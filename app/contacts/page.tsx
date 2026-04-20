@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { useContacts } from "@/components/contacts-provider";
-import { formatDate } from "@/lib/contact-utils";
+import {
+  formatDate,
+  formatOptionalDate,
+  formatProfessionalSummary,
+} from "@/lib/contact-utils";
 
 export default function ContactsPage() {
   const { contacts } = useContacts();
@@ -36,7 +40,8 @@ export default function ContactsPage() {
             <div className="contacts-table-row contacts-table-head">
               <span>Name</span>
               <span>Company</span>
-              <span>Where we met</span>
+              <span>Date met</span>
+              <span>Relationship</span>
               <span>Next follow-up</span>
             </div>
 
@@ -48,11 +53,12 @@ export default function ContactsPage() {
               >
                 <span>
                   <strong>{contact.name}</strong>
-                  <small>{contact.role}</small>
+                  <small>{formatProfessionalSummary(contact)}</small>
                 </span>
-                <span>{contact.company}</span>
-                <span>{contact.whereWeMet}</span>
-                <span>{formatDate(contact.nextFollowUpDate)}</span>
+                <span>{contact.company || "Optional"}</span>
+                <span>{contact.dateMet ? formatDate(contact.dateMet) : "Not added yet"}</span>
+                <span>{contact.relationshipType || "Not added yet"}</span>
+                <span>{formatOptionalDate(contact.nextFollowUpDate)}</span>
               </Link>
             ))}
           </div>

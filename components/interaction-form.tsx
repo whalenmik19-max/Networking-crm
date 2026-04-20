@@ -1,0 +1,96 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useContacts } from "@/components/contacts-provider";
+import { interactionTypes } from "@/lib/types";
+
+type InteractionFormProps = {
+  contactId: string;
+};
+
+export function InteractionForm({ contactId }: InteractionFormProps) {
+  const { addInteraction } = useContacts();
+  const [formState, setFormState] = useState({
+    date: "",
+    type: "coffee chat",
+    notes: "",
+  });
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    addInteraction(contactId, {
+      date: formState.date,
+      type: formState.type as (typeof interactionTypes)[number],
+      notes: formState.notes.trim(),
+    });
+
+    setFormState({
+      date: "",
+      type: "coffee chat",
+      notes: "",
+    });
+  }
+
+  return (
+    <form className="form-panel compact-form" onSubmit={handleSubmit}>
+      <div className="panel-header">
+        <div>
+          <p className="eyebrow">New interaction</p>
+          <h2>Log a conversation or touchpoint</h2>
+        </div>
+      </div>
+
+      <div className="form-grid">
+        <div className="field">
+          <label htmlFor="interaction-date">Date</label>
+          <input
+            id="interaction-date"
+            type="date"
+            required
+            value={formState.date}
+            onChange={(event) =>
+              setFormState((current) => ({ ...current, date: event.target.value }))
+            }
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="interaction-type">Type</label>
+          <select
+            id="interaction-type"
+            value={formState.type}
+            onChange={(event) =>
+              setFormState((current) => ({ ...current, type: event.target.value }))
+            }
+          >
+            {interactionTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="field field-full">
+          <label htmlFor="interaction-notes">Notes</label>
+          <textarea
+            id="interaction-notes"
+            required
+            value={formState.notes}
+            onChange={(event) =>
+              setFormState((current) => ({ ...current, notes: event.target.value }))
+            }
+            placeholder="Summarize what happened, what you learned, and any next step you want to remember."
+          />
+        </div>
+      </div>
+
+      <div className="form-actions">
+        <button type="submit" className="button button-primary">
+          Save interaction
+        </button>
+      </div>
+    </form>
+  );
+}

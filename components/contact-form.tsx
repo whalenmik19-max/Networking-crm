@@ -3,40 +3,87 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useContacts } from "@/components/contacts-provider";
+import type { Contact, NewContact, RelationshipType } from "@/lib/types";
 
-export function ContactForm() {
+type ContactFormProps = {
+  mode?: "create" | "edit";
+  initialContact?: Contact;
+};
+
+type ContactFormState = {
+  name: string;
+  company: string;
+  role: string;
+  dateMet: string;
+  whereWeMet: string;
+  relationshipType: RelationshipType;
+  notes: string;
+  nextFollowUpDate: string;
+  tags: string;
+};
+
+function buildFormState(contact?: Contact): ContactFormState {
+  return {
+    name: contact?.name ?? "",
+    company: contact?.company ?? "",
+    role: contact?.role ?? "",
+    dateMet: contact?.dateMet ?? "",
+    whereWeMet: contact?.whereWeMet ?? "",
+    relationshipType: contact?.relationshipType ?? "",
+    notes: contact?.notes ?? "",
+    nextFollowUpDate: contact?.nextFollowUpDate ?? "",
+    tags: contact?.tags.join(", ") ?? "",
+  };
+}
+
+export function ContactForm({
+  mode = "create",
+  initialContact,
+}: ContactFormProps) {
   const router = useRouter();
-  const { addContact } = useContacts();
-  const [formState, setFormState] = useState({
-    name: "",
-    company: "",
-    role: "",
-    whereWeMet: "",
-    notes: "",
-    nextFollowUpDate: "",
-    tags: "",
-  });
+  const { addContact, updateContact } = useContacts();
+  const [formState, setFormState] = useState<ContactFormState>(() =>
+    buildFormState(initialContact),
+  );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const contact = addContact({
+    const contactData: NewContact = {
       name: formState.name.trim(),
       company: formState.company.trim(),
       role: formState.role.trim(),
+      dateMet: formState.dateMet,
       whereWeMet: formState.whereWeMet.trim(),
+      relationshipType: formState.relationshipType.trim(),
       notes: formState.notes.trim(),
       nextFollowUpDate: formState.nextFollowUpDate,
+      reminderAt: "",
       tags: formState.tags
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean),
-    });
+      interactions: initialContact?.interactions ?? [],
+    };
 
+    if (mode === "edit" && initialContact) {
+      const updatedContact = updateContact(initialContact.id, contactData);
+
+      if (updatedContact) {
+        router.push(`/contacts/${updatedContact.id}`);
+      }
+
+      return;
+    }
+
+    const contact = addContact(contactData);
     router.push(`/contacts/${contact.id}`);
   }
 
-  function updateField(name: keyof typeof formState, value: string) {
+  function updateField<Name extends keyof typeof formState>(
+    name: Name,
+    value: (typeof formState)[Name],
+  ) {
     setFormState((current) => ({
       ...current,
       [name]: value,
@@ -61,21 +108,32 @@ export function ContactForm() {
           <label htmlFor="company">Company</label>
           <input
             id="company"
-            required
             value={formState.company}
             onChange={(event) => updateField("company", event.target.value)}
             placeholder="Acme Labs"
           />
+          <p className="helper-text">Optional.</p>
         </div>
 
         <div className="field">
           <label htmlFor="role">Role</label>
           <input
             id="role"
-            required
             value={formState.role}
             onChange={(event) => updateField("role", event.target.value)}
             placeholder="Software Engineer"
+          />
+          <p className="helper-text">Optional.</p>
+        </div>
+
+        <div className="field">
+          <label htmlFor="dateMet">Date met</label>
+          <input
+            id="dateMet"
+            type="date"
+            required
+            value={formState.dateMet}
+            onChange={(event) => updateField("dateMet", event.target.value)}
           />
         </div>
 
@@ -91,14 +149,25 @@ export function ContactForm() {
         </div>
 
         <div className="field">
+          <label htmlFor="relationshipType">Relationship type</label>
+          <input
+            id="relationshipType"
+            value={formState.relationshipType}
+            onChange={(event) => updateField("relationshipType", event.target.value)}
+            placeholder="Mentor, recruiter, friend, alumni contact..."
+          />
+          <p className="helper-text">Type any label that fits this relationship.</p>
+        </div>
+
+        <div className="field">
           <label htmlFor="nextFollowUpDate">Next follow-up date</label>
           <input
             id="nextFollowUpDate"
             type="date"
-            required
             value={formState.nextFollowUpDate}
             onChange={(event) => updateField("nextFollowUpDate", event.target.value)}
           />
+          <p className="helper-text">Leave this blank if you do not want to schedule one yet.</p>
         </div>
 
         <div className="field">
@@ -126,7 +195,7 @@ export function ContactForm() {
 
       <div className="form-actions">
         <button type="submit" className="button button-primary">
-          Save contact
+          {mode === "edit" ? "Update contact" : "Save contact"}
         </button>
       </div>
     </form>
