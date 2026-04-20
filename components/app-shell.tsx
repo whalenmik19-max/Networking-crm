@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
 
 const navItems = [
   { href: "/", label: "Dashboard" },
@@ -11,6 +12,12 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { currentUser, isGuestMode, logOut } = useAuth();
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+
+  if (isAuthPage) {
+    return <main>{children}</main>;
+  }
 
   return (
     <div className="app-shell">
@@ -35,8 +42,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+
+          {currentUser ? (
+            <button type="button" className="nav-link nav-button" onClick={logOut}>
+              Log out
+            </button>
+          ) : (
+            <>
+              <Link href="/login" className="nav-link">
+                Log in
+              </Link>
+              <Link href="/signup" className="nav-link active">
+                Sign up
+              </Link>
+            </>
+          )}
         </nav>
       </header>
+
+      {currentUser ? (
+        <div className="session-bar">
+          <p className="helper-text">
+            Signed in as <strong>{currentUser.name}</strong> ({currentUser.email})
+          </p>
+        </div>
+      ) : isGuestMode ? (
+        <div className="session-bar">
+          <p className="helper-text">
+            You&apos;re exploring the sample CRM. Create an account to save your own private contacts.
+          </p>
+        </div>
+      ) : null}
 
       <main>{children}</main>
     </div>

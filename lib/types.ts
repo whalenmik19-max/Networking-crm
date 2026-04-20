@@ -23,6 +23,7 @@ export type Contact = {
   name: string;
   company: string;
   role: string;
+  school: string;
   dateMet: string;
   whereWeMet: string;
   relationshipType: RelationshipType;

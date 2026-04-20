@@ -14,6 +14,7 @@ type ContactFormState = {
   name: string;
   company: string;
   role: string;
+  school: string;
   dateMet: string;
   whereWeMet: string;
   relationshipType: RelationshipType;
@@ -27,6 +28,7 @@ function buildFormState(contact?: Contact): ContactFormState {
     name: contact?.name ?? "",
     company: contact?.company ?? "",
     role: contact?.role ?? "",
+    school: contact?.school ?? "",
     dateMet: contact?.dateMet ?? "",
     whereWeMet: contact?.whereWeMet ?? "",
     relationshipType: contact?.relationshipType ?? "",
@@ -41,18 +43,22 @@ export function ContactForm({
   initialContact,
 }: ContactFormProps) {
   const router = useRouter();
-  const { addContact, updateContact } = useContacts();
+  const { addContact, updateContact, canAddContact, guestContactsRemaining, isGuestMode } =
+    useContacts();
+  const [formError, setFormError] = useState("");
   const [formState, setFormState] = useState<ContactFormState>(() =>
     buildFormState(initialContact),
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError("");
 
     const contactData: NewContact = {
       name: formState.name.trim(),
       company: formState.company.trim(),
       role: formState.role.trim(),
+      school: formState.school.trim(),
       dateMet: formState.dateMet,
       whereWeMet: formState.whereWeMet.trim(),
       relationshipType: formState.relationshipType.trim(),
@@ -77,6 +83,14 @@ export function ContactForm({
     }
 
     const contact = addContact(contactData);
+
+    if (!contact) {
+      setFormError(
+        "Demo mode lets you add up to 3 of your own contacts. Sign up to save more.",
+      );
+      return;
+    }
+
     router.push(`/contacts/${contact.id}`);
   }
 
@@ -92,6 +106,16 @@ export function ContactForm({
 
   return (
     <form className="form-panel" onSubmit={handleSubmit}>
+      {mode === "create" && isGuestMode ? (
+        <div className="trial-banner">
+          <p className="eyebrow">Try the product</p>
+          <p className="section-copy">
+            You can add up to {guestContactsRemaining} more contact
+            {guestContactsRemaining === 1 ? "" : "s"} in demo mode before signing up.
+          </p>
+        </div>
+      ) : null}
+
       <div className="form-grid">
         <div className="field">
           <label htmlFor="name">Name</label>
@@ -124,6 +148,17 @@ export function ContactForm({
             placeholder="Software Engineer"
           />
           <p className="helper-text">Optional.</p>
+        </div>
+
+        <div className="field">
+          <label htmlFor="school">School</label>
+          <input
+            id="school"
+            value={formState.school}
+            onChange={(event) => updateField("school", event.target.value)}
+            placeholder="University of Michigan"
+          />
+          <p className="helper-text">Optional, but helpful for school-based networking.</p>
         </div>
 
         <div className="field">
@@ -192,6 +227,8 @@ export function ContactForm({
           />
         </div>
       </div>
+
+      {formError ? <p className="auth-error">{formError}</p> : null}
 
       <div className="form-actions">
         <button type="submit" className="button button-primary">

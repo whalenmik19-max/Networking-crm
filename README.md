@@ -10,9 +10,30 @@ Version 1 includes:
 - A contacts page with all saved relationships
 - A form for adding a new contact
 - A contact detail page for reviewing notes
-- The main fields you asked for: name, company, role, where we met, notes, next follow-up date, and tags
+- Sign up, log in, and log out
+- Per-user contact storage in the browser
+- Interaction history and conversation prep on each contact page
+- The main fields you asked for: name, company, role, school, where we met, notes, next follow-up date, relationship type, and tags
 
 This version stores contact data in the browser with `localStorage`, which keeps the project simple for learning and easy to run without a database.
+
+## Before you deploy
+
+This app currently uses browser `localStorage` for:
+
+- user accounts
+- login sessions
+- contacts
+- reminders
+
+That means:
+
+- each person will only see the data saved in their own browser
+- data does not sync across devices
+- this is good for a demo or student project
+- this is not a production-ready multi-user backend yet
+
+If you want shared accounts and real synced data later, the next step would be adding a backend such as Supabase, Firebase, or Postgres.
 
 ## Getting started
 
@@ -35,6 +56,35 @@ This version stores contact data in the browser with `localStorage`, which keeps
    ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deploying to Vercel
+
+The easiest way to get a public link is to deploy with Vercel.
+
+1. Push this project to GitHub.
+
+2. Go to [Vercel](https://vercel.com/) and sign in.
+
+3. Click **Add New...** then **Project**.
+
+4. Import your GitHub repository.
+
+5. Keep the default Next.js settings.
+
+6. Click **Deploy**.
+
+After deployment, Vercel will give you a public URL you can share.
+
+## Important deployment note
+
+Because this app uses `localStorage`, people visiting the deployed app will not share the same data.
+
+Examples:
+
+- if you add a contact in your browser, someone else will not see it in their browser
+- if you log in on your laptop, that same account data will not automatically appear on your phone unless it was created there too
+
+For a demo, this is completely fine. For a real product, you would move auth and contacts into a database-backed system.
 
 ## Available scripts
 

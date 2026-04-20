@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { SectionCard } from "@/components/section-card";
+import { useAuth } from "@/components/auth-provider";
 import { useContacts } from "@/components/contacts-provider";
 import {
   formatDate,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/contact-utils";
 
 export default function DashboardPage() {
+  const { currentUser } = useAuth();
   const { contacts } = useContacts();
   const overdueFollowUps = getOverdueFollowUps(contacts);
   const dueThisWeek = getFollowUpsDueThisWeek(contacts);
@@ -26,20 +28,31 @@ export default function DashboardPage() {
     <div className="page-stack">
       <section className="hero">
         <div>
-          <p className="eyebrow">Version 1 dashboard</p>
-          <h1>Stay warm with the people in your network.</h1>
+          <p className="eyebrow">{currentUser ? "Your dashboard" : "Sample dashboard"}</p>
+          <h1>
+            {currentUser
+              ? "Stay warm with the people in your network."
+              : "Try a polished networking CRM before creating an account."}
+          </h1>
           <p className="hero-copy">
-            Track where you met, remember key notes, and keep up with follow-ups
-            before opportunities go cold.
+            {currentUser
+              ? "Track where you met, remember key notes, and keep up with follow-ups before opportunities go cold."
+              : "Browse a sample student-friendly CRM, add up to 3 trial contacts, and see how notes, follow-ups, and conversation prep work."}
           </p>
         </div>
         <div className="hero-actions">
           <Link className="button button-primary" href="/contacts/new">
-            Add a contact
+            {currentUser ? "Add a contact" : "Try adding a contact"}
           </Link>
-          <Link className="button button-secondary" href="/contacts">
-            View all contacts
-          </Link>
+          {currentUser ? (
+            <Link className="button button-secondary" href="/contacts">
+              View all contacts
+            </Link>
+          ) : (
+            <Link className="button button-secondary" href="/signup">
+              Create an account
+            </Link>
+          )}
         </div>
       </section>
 

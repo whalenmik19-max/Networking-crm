@@ -49,6 +49,29 @@ export function formatProfessionalSummary(contact: Contact) {
   return "No company or role added yet";
 }
 
+export function searchContacts(contacts: Contact[], query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return contacts;
+  }
+
+  return contacts.filter((contact) => {
+    const searchableText = [
+      contact.name,
+      contact.company,
+      contact.role,
+      contact.school,
+      contact.relationshipType,
+      ...contact.tags,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(normalizedQuery);
+  });
+}
+
 function toLocalDateString(date: Date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");

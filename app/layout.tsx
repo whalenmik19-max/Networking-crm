@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+import { AuthGuard } from "@/components/auth-guard";
+import { AuthProvider } from "@/components/auth-provider";
 import { ContactsProvider } from "@/components/contacts-provider";
 
 export const metadata: Metadata = {
@@ -16,9 +18,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ContactsProvider>
-          <AppShell>{children}</AppShell>
-        </ContactsProvider>
+        <AuthProvider>
+          <ContactsProvider>
+            <AuthGuard>
+              <AppShell>{children}</AppShell>
+            </AuthGuard>
+          </ContactsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

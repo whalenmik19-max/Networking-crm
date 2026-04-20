@@ -63,6 +63,10 @@ export default function ContactDetailPage() {
               <dd>{contact.role || "Not added yet"}</dd>
             </div>
             <div>
+              <dt>School</dt>
+              <dd>{contact.school || "Not added yet"}</dd>
+            </div>
+            <div>
               <dt>Date met</dt>
               <dd>{contact.dateMet ? formatDate(contact.dateMet) : "Not added yet"}</dd>
             </div>
