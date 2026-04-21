@@ -108,17 +108,18 @@ export function AuthForm({ mode }: AuthFormProps) {
             </button>
           </div>
 
-          <p className="helper-text">
-            {mode === "signup" ? (
-              <>
-                Already have an account? <Link href="/login">Log in</Link>
-              </>
-            ) : (
-              <>
-                Need an account? <Link href="/signup">Sign up</Link>
-              </>
-            )}
-          </p>
+          {mode === "signup" ? (
+            <p className="helper-text">
+              Already have an account? <Link href="/login">Log in</Link>
+            </p>
+          ) : (
+            <div className="auth-switch">
+              <p className="helper-text">Need an account first?</p>
+              <Link href="/signup" className="button button-secondary">
+                Go to sign up
+              </Link>
+            </div>
+          )}
         </form>
       </section>
     </div>

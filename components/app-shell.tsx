@@ -48,14 +48,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               Log out
             </button>
           ) : (
-            <>
-              <Link href="/login" className="nav-link">
-                Log in
-              </Link>
-              <Link href="/signup" className="nav-link active">
-                Sign up
-              </Link>
-            </>
+            <Link href="/login" className="nav-link active">
+              Log in / Sign up
+            </Link>
           )}
         </nav>
       </header>

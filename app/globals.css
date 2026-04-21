@@ -658,6 +658,11 @@ h3 {
   font-weight: 600;
 }
 
+.auth-switch {
+  display: grid;
+  gap: 0.65rem;
+}
+
 .timeline {
   position: relative;
   display: grid;
