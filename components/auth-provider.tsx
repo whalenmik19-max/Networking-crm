@@ -7,136 +7,127 @@ import {
   useMemo,
   useState,
 } from "react";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-type AuthUser = {
+type PublicAuthUser = {
   id: string;
   name: string;
   email: string;
-  password: string;
 };
 
-type PublicAuthUser = Omit<AuthUser, "password">;
+type AuthResult = Promise<{
+  success: boolean;
+  error?: string;
+  requiresEmailConfirmation?: boolean;
+}>;
 
 type AuthContextValue = {
   currentUser: PublicAuthUser | null;
   isGuestMode: boolean;
   isLoading: boolean;
-  signUp: (input: { name: string; email: string; password: string }) => {
-    success: boolean;
-    error?: string;
-  };
-  logIn: (input: { email: string; password: string }) => {
-    success: boolean;
-    error?: string;
-  };
-  logOut: () => void;
+  signUp: (input: { name: string; email: string; password: string }) => AuthResult;
+  logIn: (input: { email: string; password: string }) => AuthResult;
+  logOut: () => Promise<void>;
 };
 
-const usersStorageKey = "networking-crm-users";
-const sessionStorageKey = "networking-crm-session-user-id";
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function toPublicUser(user: AuthUser): PublicAuthUser {
+function toPublicUser(user: User): PublicAuthUser {
+  const metadataName = user.user_metadata.name;
+
   return {
     id: user.id,
-    name: user.name,
-    email: user.email,
+    name:
+      typeof metadataName === "string" && metadataName.trim().length > 0
+        ? metadataName.trim()
+        : user.email?.split("@")[0] ?? "Keeply user",
+    email: user.email ?? "",
   };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [users, setUsers] = useState<AuthUser[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<PublicAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedUsers = window.localStorage.getItem(usersStorageKey);
-    const storedSession = window.localStorage.getItem(sessionStorageKey);
+    const supabase = getSupabaseBrowserClient();
 
-    if (storedUsers) {
-      setUsers(JSON.parse(storedUsers) as AuthUser[]);
+    async function loadSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      setCurrentUser(session?.user ? toPublicUser(session.user) : null);
+      setIsLoading(false);
     }
 
-    if (storedSession) {
-      setCurrentUserId(storedSession);
-    }
+    void loadSession();
 
-    setIsLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+      setCurrentUser(session?.user ? toPublicUser(session.user) : null);
+      setIsLoading(false);
+      },
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
-    window.localStorage.setItem(usersStorageKey, JSON.stringify(users));
-  }, [users, isLoading]);
-
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
-    if (currentUserId) {
-      window.localStorage.setItem(sessionStorageKey, currentUserId);
-      return;
-    }
-
-    window.localStorage.removeItem(sessionStorageKey);
-  }, [currentUserId, isLoading]);
-
   const value = useMemo<AuthContextValue>(() => {
-    const currentUser = users.find((user) => user.id === currentUserId) ?? null;
+    const supabase = getSupabaseBrowserClient();
 
     return {
-      currentUser: currentUser ? toPublicUser(currentUser) : null,
+      currentUser,
       isGuestMode: !currentUser,
       isLoading,
-      signUp: ({ name, email, password }) => {
-        const normalizedEmail = email.trim().toLowerCase();
-
-        if (users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
-          return {
-            success: false,
-            error: "An account with this email already exists.",
-          };
-        }
-
-        const newUser: AuthUser = {
-          id: crypto.randomUUID(),
-          name: name.trim(),
-          email: normalizedEmail,
+      signUp: async ({ name, email, password }) => {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim().toLowerCase(),
           password,
-        };
+          options: {
+            data: {
+              name: name.trim(),
+            },
+          },
+        });
 
-        setUsers((current) => [...current, newUser]);
-        setCurrentUserId(newUser.id);
-
-        return { success: true };
-      },
-      logIn: ({ email, password }) => {
-        const normalizedEmail = email.trim().toLowerCase();
-        const matchingUser = users.find(
-          (user) =>
-            user.email.toLowerCase() === normalizedEmail && user.password === password,
-        );
-
-        if (!matchingUser) {
+        if (error) {
           return {
             success: false,
-            error: "Email or password did not match.",
+            error: error.message,
           };
         }
 
-        setCurrentUserId(matchingUser.id);
+        return {
+          success: true,
+          requiresEmailConfirmation: !data.session,
+        };
+      },
+      logIn: async ({ email, password }) => {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+
+        if (error) {
+          return {
+            success: false,
+            error: error.message,
+          };
+        }
 
         return { success: true };
       },
-      logOut: () => {
-        setCurrentUserId(null);
+      logOut: async () => {
+        await supabase.auth.signOut();
       },
     };
-  }, [users, currentUserId, isLoading]);
+  }, [currentUser, isLoading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

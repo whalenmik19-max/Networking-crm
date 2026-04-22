@@ -15,25 +15,25 @@ Version 1 includes:
 - Interaction history and conversation prep on each contact page
 - The main fields you asked for: name, company, role, school, where we met, notes, next follow-up date, relationship type, and tags
 
-This version stores contact data in the browser with `localStorage`, which keeps the project simple for learning and easy to run without a database.
+This version uses Supabase Auth for sign up and log in, while still storing contact data in the browser with `localStorage` so the project stays simple to learn from.
 
 ## Before you deploy
 
-This app currently uses browser `localStorage` for:
+This app currently uses:
 
-- user accounts
-- login sessions
+- Supabase Auth for user accounts and login sessions
+- browser `localStorage` for:
 - contacts
 - reminders
 
 That means:
 
-- each person will only see the data saved in their own browser
+- each person will only see the contacts saved in their own browser on that device
 - data does not sync across devices
 - this is good for a demo or student project
-- this is not a production-ready multi-user backend yet
+- this is not a full production-ready multi-user data backend yet
 
-If you want shared accounts and real synced data later, the next step would be adding a backend such as Supabase, Firebase, or Postgres.
+If you want shared, synced contacts later, the next step would be storing contacts in Supabase tables instead of only in the browser.
 
 ## Getting started
 
@@ -49,13 +49,26 @@ If you want shared accounts and real synced data later, the next step would be a
    npm install
    ```
 
-3. Start the development server:
+3. Create a local environment file:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+4. Add your Supabase values to `.env.local`:
+
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   ```
+
+5. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Deploying to Vercel
 
@@ -147,11 +160,17 @@ networking-crm/
 - `components/contact-form.tsx`
   The form logic for creating new contacts and redirecting to the new detail page.
 
+- `components/auth-provider.tsx`
+  A React context that uses Supabase Auth for sign up, log in, log out, and session loading.
+
 - `components/contacts-provider.tsx`
-  A React context that stores contacts in memory and syncs them to `localStorage`.
+  A React context that stores contacts in memory and syncs them to `localStorage`, using the logged-in user's ID to keep each person's contact list separate.
 
 - `lib/sample-contacts.ts`
   Starter data so the app is not empty on first load.
+
+- `lib/supabase/client.ts`
+  The shared browser Supabase client used by the auth provider.
 
 - `lib/contact-utils.ts`
   Small helper functions for formatting dates and sorting follow-ups.
@@ -162,5 +181,5 @@ networking-crm/
 ## Beginner notes
 
 - This project uses the Next.js App Router, so each `page.tsx` file becomes a route.
-- The app is intentionally database-free for version 1.
-- If you want a version 2 later, a good next step would be editing contacts and saving them to a real backend like Supabase, Postgres, or Firebase.
+- The app now uses Supabase Auth, but contact records are still stored locally in the browser.
+- A strong version 2 step would be moving contacts, interactions, and reminders into Supabase tables.

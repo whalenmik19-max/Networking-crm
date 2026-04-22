@@ -49,6 +49,15 @@ export function formatProfessionalSummary(contact: Contact) {
   return "No company or role added yet";
 }
 
+export function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export function searchContacts(contacts: Contact[], query: string) {
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -61,6 +70,8 @@ export function searchContacts(contacts: Contact[], query: string) {
       contact.name,
       contact.company,
       contact.role,
+      contact.email,
+      contact.phoneNumber,
       contact.school,
       contact.relationshipType,
       ...contact.tags,
@@ -106,6 +117,20 @@ export function getLastContactDate(contact: Contact) {
   }
 
   return [...dates].sort((first, second) => second.localeCompare(first))[0];
+}
+
+export function getDaysSinceLastContact(contact: Contact) {
+  const lastContactDate = getLastContactDate(contact);
+
+  if (!lastContactDate) {
+    return null;
+  }
+
+  const now = new Date();
+  const then = new Date(`${lastContactDate}T00:00:00`);
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+  return Math.floor((now.getTime() - then.getTime()) / millisecondsPerDay);
 }
 
 export function getUpcomingFollowUps(contacts: Contact[]) {

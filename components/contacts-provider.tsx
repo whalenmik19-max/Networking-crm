@@ -38,6 +38,8 @@ function normalizeContact(contact: Partial<Contact>): Contact {
     name: contact.name ?? "",
     company: contact.company ?? "",
     role: contact.role ?? "",
+    email: contact.email ?? "",
+    phoneNumber: contact.phoneNumber ?? "",
     school: contact.school ?? "",
     dateMet: contact.dateMet ?? "",
     whereWeMet: contact.whereWeMet ?? "",

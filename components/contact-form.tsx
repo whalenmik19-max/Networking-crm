@@ -14,6 +14,8 @@ type ContactFormState = {
   name: string;
   company: string;
   role: string;
+  email: string;
+  phoneNumber: string;
   school: string;
   dateMet: string;
   whereWeMet: string;
@@ -28,6 +30,8 @@ function buildFormState(contact?: Contact): ContactFormState {
     name: contact?.name ?? "",
     company: contact?.company ?? "",
     role: contact?.role ?? "",
+    email: contact?.email ?? "",
+    phoneNumber: contact?.phoneNumber ?? "",
     school: contact?.school ?? "",
     dateMet: contact?.dateMet ?? "",
     whereWeMet: contact?.whereWeMet ?? "",
@@ -58,6 +62,8 @@ export function ContactForm({
       name: formState.name.trim(),
       company: formState.company.trim(),
       role: formState.role.trim(),
+      email: formState.email.trim(),
+      phoneNumber: formState.phoneNumber.trim(),
       school: formState.school.trim(),
       dateMet: formState.dateMet,
       whereWeMet: formState.whereWeMet.trim(),
@@ -116,9 +122,13 @@ export function ContactForm({
         </div>
       ) : null}
 
+      <p className="helper-text form-note">
+        You can start with just a name-add more later.
+      </p>
+
       <div className="form-grid">
         <div className="field">
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name">Name *</label>
           <input
             id="name"
             required
@@ -136,7 +146,6 @@ export function ContactForm({
             onChange={(event) => updateField("company", event.target.value)}
             placeholder="Acme Labs"
           />
-          <p className="helper-text">Optional.</p>
         </div>
 
         <div className="field">
@@ -147,7 +156,28 @@ export function ContactForm({
             onChange={(event) => updateField("role", event.target.value)}
             placeholder="Software Engineer"
           />
-          <p className="helper-text">Optional.</p>
+        </div>
+
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={formState.email}
+            onChange={(event) => updateField("email", event.target.value)}
+            placeholder="name@example.com"
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="phoneNumber">Phone Number</label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            value={formState.phoneNumber}
+            onChange={(event) => updateField("phoneNumber", event.target.value)}
+            placeholder="(555) 555-5555"
+          />
         </div>
 
         <div className="field">
@@ -158,25 +188,22 @@ export function ContactForm({
             onChange={(event) => updateField("school", event.target.value)}
             placeholder="University of Michigan"
           />
-          <p className="helper-text">Optional, but helpful for school-based networking.</p>
         </div>
 
         <div className="field">
-          <label htmlFor="dateMet">Date met</label>
+          <label htmlFor="dateMet">Date Met *</label>
           <input
             id="dateMet"
             type="date"
-            required
             value={formState.dateMet}
             onChange={(event) => updateField("dateMet", event.target.value)}
           />
         </div>
 
         <div className="field">
-          <label htmlFor="whereWeMet">Where we met</label>
+          <label htmlFor="whereWeMet">Where we met *</label>
           <input
             id="whereWeMet"
-            required
             value={formState.whereWeMet}
             onChange={(event) => updateField("whereWeMet", event.target.value)}
             placeholder="Campus career fair"
@@ -220,7 +247,6 @@ export function ContactForm({
           <label htmlFor="notes">Notes</label>
           <textarea
             id="notes"
-            required
             value={formState.notes}
             onChange={(event) => updateField("notes", event.target.value)}
             placeholder="Talked about product design internships and their advice for sophomore year recruiting."

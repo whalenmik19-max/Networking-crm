@@ -23,6 +23,8 @@ export type Contact = {
   name: string;
   company: string;
   role: string;
+  email: string;
+  phoneNumber: string;
   school: string;
   dateMet: string;
   whereWeMet: string;

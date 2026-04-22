@@ -13,6 +13,8 @@ export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const { logIn, signUp } = useAuth();
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formState, setFormState] = useState({
     name: "",
     email: "",
@@ -26,19 +28,31 @@ export function AuthForm({ mode }: AuthFormProps) {
     }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
+    setSuccessMessage("");
+    setIsSubmitting(true);
 
     const result =
       mode === "signup"
-        ? signUp(formState)
-        : logIn({
+        ? await signUp(formState)
+        : await logIn({
             email: formState.email,
             password: formState.password,
           });
 
+    setIsSubmitting(false);
+
     if (!result.success) {
       setError(result.error ?? "Something went wrong.");
+      return;
+    }
+
+    if (mode === "signup" && result.requiresEmailConfirmation) {
+      setSuccessMessage(
+        "Check your email to confirm your account, then come back and log in.",
+      );
       return;
     }
 
@@ -52,8 +66,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           <p className="eyebrow">{mode === "signup" ? "Sign up" : "Log in"}</p>
           <h1>
             {mode === "signup"
-              ? "Create your networking CRM account"
-              : "Welcome back to your networking CRM"}
+              ? "Create your Keeply account"
+              : "Welcome back to Keeply"}
           </h1>
           <p className="section-copy">
             {mode === "signup"
@@ -101,9 +115,10 @@ export function AuthForm({ mode }: AuthFormProps) {
           </div>
 
           {error ? <p className="auth-error">{error}</p> : null}
+          {successMessage ? <p className="helper-text">{successMessage}</p> : null}
 
           <div className="form-actions">
-            <button type="submit" className="button button-primary">
+            <button type="submit" className="button button-primary" disabled={isSubmitting}>
               {mode === "signup" ? "Create account" : "Log in"}
             </button>
           </div>

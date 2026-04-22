@@ -8,6 +8,7 @@ import {
   formatDate,
   formatOptionalDate,
   formatProfessionalSummary,
+  getInitials,
   searchContacts,
 } from "@/lib/contact-utils";
 
@@ -46,10 +47,14 @@ export default function ContactsPage() {
         </div>
       </section>
 
+      <p className="helper-text table-hint">
+        Click a contact to view notes and prep your next conversation.
+      </p>
+
       {contacts.length === 0 ? (
         <EmptyState
           title="Your contact list is empty"
-          description="Add your first networking contact to start building your personal CRM."
+          description="Add your first networking contact to start building your Keeply workspace."
           actionLabel="Create contact"
           actionHref="/contacts/new"
         />
@@ -70,6 +75,7 @@ export default function ContactsPage() {
               <span>Date met</span>
               <span>Relationship</span>
               <span>Next follow-up</span>
+              <span />
             </div>
 
             {filteredContacts.map((contact) => (
@@ -78,14 +84,18 @@ export default function ContactsPage() {
                 href={`/contacts/${contact.id}`}
                 className="contacts-table-row contacts-table-link"
               >
-                <span>
-                  <strong>{contact.name}</strong>
-                  <small>{formatProfessionalSummary(contact)}</small>
+                <span className="contact-name-cell">
+                  <span className="avatar-circle">{getInitials(contact.name)}</span>
+                  <span className="contact-name-copy">
+                    <strong className="contact-name-text">{contact.name}</strong>
+                    <small>{formatProfessionalSummary(contact)}</small>
+                  </span>
                 </span>
                 <span>{contact.company || "Optional"}</span>
                 <span>{contact.dateMet ? formatDate(contact.dateMet) : "Not added yet"}</span>
                 <span>{contact.relationshipType || "Not added yet"}</span>
                 <span>{formatOptionalDate(contact.nextFollowUpDate)}</span>
+                <span className="view-cell">View →</span>
               </Link>
             ))}
           </div>

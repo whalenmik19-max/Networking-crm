@@ -83,19 +83,14 @@ button {
   font-size: 0.85rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: #16392f;
+  font-weight: 700;
 }
 
-.brand-name,
 h1,
 h2,
 h3 {
   font-family: var(--font-display), serif;
-}
-
-.brand-name {
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
 }
 
 .nav {
@@ -125,7 +120,7 @@ h3 {
 .page-stack {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.75rem;
 }
 
 .session-bar {
@@ -179,7 +174,7 @@ h3 {
   max-width: 60ch;
   color: var(--muted);
   line-height: 1.65;
-  font-size: 0.98rem;
+  font-size: 1.06rem;
 }
 
 .hero-actions {
@@ -352,6 +347,37 @@ h3 {
   gap: 0.8rem;
 }
 
+.conversation-prep-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.conversation-prep-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.conversation-prep-card:hover {
+  border-color: rgba(33, 92, 74, 0.2);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.prep-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.prep-meta-wide {
+  grid-column: 1 / -1;
+}
+
 .action-card {
   display: flex;
   flex-direction: column;
@@ -397,8 +423,8 @@ h3 {
 }
 
 .status-danger {
-  background: #f8dfd8;
-  color: #8c2f18;
+  background: #f3c9bd;
+  color: #7a220c;
 }
 
 .status-warning {
@@ -477,7 +503,7 @@ h3 {
 
 .contacts-table-row {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr 0.9fr;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr 0.95fr 0.6fr;
   gap: 1rem;
   padding: 0.95rem 1rem;
   border: 1px solid transparent;
@@ -503,11 +529,55 @@ h3 {
   border-color: var(--border);
   box-shadow: var(--shadow-soft);
   transition: border-color 160ms ease, background-color 160ms ease;
+  cursor: pointer;
 }
 
 .contacts-table-link:hover {
-  background: rgba(255, 255, 255, 0.92);
+  background: #edf4ef;
   border-color: rgba(33, 92, 74, 0.2);
+}
+
+.contact-name-cell {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.8rem !important;
+}
+
+.contact-name-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.contact-name-text {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.contacts-table-link:hover .contact-name-text {
+  text-decoration: underline;
+}
+
+.avatar-circle {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.84rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.view-cell {
+  color: var(--muted);
+  font-size: 0.84rem;
+  justify-content: flex-end;
+  text-align: right;
 }
 
 .contacts-table-row small {
@@ -568,6 +638,11 @@ h3 {
   margin: 0;
   color: var(--muted);
   font-size: 0.84rem;
+}
+
+.form-note,
+.table-hint {
+  margin-top: -0.25rem;
 }
 
 .form-actions {
@@ -663,6 +738,32 @@ h3 {
   gap: 0.65rem;
 }
 
+.feedback-panel {
+  display: grid;
+  align-content: start;
+}
+
+.feedback-success {
+  margin: 0;
+  color: #1e6b47;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.dashboard-callout {
+  margin: 0 0 1rem;
+  color: var(--accent-strong);
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.suggested-follow-up-card {
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(33, 92, 74, 0.16);
+  border-radius: 16px;
+  background: rgba(228, 239, 233, 0.55);
+}
+
 .timeline {
   position: relative;
   display: grid;
@@ -754,7 +855,8 @@ small {
   .list-grid,
   .form-grid,
   .dashboard-grid,
-  .prep-grid {
+  .prep-grid,
+  .prep-meta-grid {
     grid-template-columns: 1fr;
   }
 

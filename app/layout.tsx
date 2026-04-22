@@ -6,8 +6,8 @@ import { AuthProvider } from "@/components/auth-provider";
 import { ContactsProvider } from "@/components/contacts-provider";
 
 export const metadata: Metadata = {
-  title: "Networking CRM",
-  description: "A simple personal networking CRM for students and early-career professionals.",
+  title: "Keeply",
+  description: "Keeply is a simple personal networking app for students and early-career professionals.",
 };
 
 export default function RootLayout({

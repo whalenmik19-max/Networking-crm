@@ -63,6 +63,14 @@ export default function ContactDetailPage() {
               <dd>{contact.role || "Not added yet"}</dd>
             </div>
             <div>
+              <dt>Email</dt>
+              <dd>{contact.email || "Not added yet"}</dd>
+            </div>
+            <div>
+              <dt>Phone Number</dt>
+              <dd>{contact.phoneNumber || "Not added yet"}</dd>
+            </div>
+            <div>
               <dt>School</dt>
               <dd>{contact.school || "Not added yet"}</dd>
             </div>
@@ -135,8 +143,10 @@ export default function ContactDetailPage() {
           </article>
 
           <article className="prep-card prep-card-wide">
-            <p className="prep-label">Suggested follow-up message</p>
-            <p className="notes-copy">{conversationPrep.suggestedMessage}</p>
+            <div className="suggested-follow-up-card">
+              <p className="prep-label">💬 Suggested follow-up</p>
+              <p className="notes-copy">{conversationPrep.suggestedMessage}</p>
+            </div>
           </article>
         </div>
       </section>

@@ -8,7 +8,7 @@ export default function NewContactPage() {
       <section className="page-header">
         <div>
           <p className="eyebrow">Add contact</p>
-          <h1>Add a new relationship to your CRM</h1>
+          <h1>Add a new relationship to Keeply</h1>
           <p className="section-copy">
             Capture the basics now so future follow-ups are easier and more personal.
           </p>

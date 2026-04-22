@@ -8,6 +8,7 @@ const navItems = [
   { href: "/", label: "Dashboard" },
   { href: "/contacts", label: "Contacts" },
   { href: "/contacts/new", label: "Add Contact" },
+  { href: "/feedback", label: "Feedback" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -23,8 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="app-shell">
       <header className="site-header">
         <Link href="/" className="brand">
-          <span className="brand-mark">Networking CRM</span>
-          <span className="brand-name">Relationship notes for your future self</span>
+          <span className="brand-mark">Keeply</span>
         </Link>
 
         <nav className="nav" aria-label="Main navigation">
@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       ) : isGuestMode ? (
         <div className="session-bar">
           <p className="helper-text">
-            You&apos;re exploring the sample CRM. Create an account to save your own private contacts.
+            You&apos;re exploring the Keeply sample workspace. Create an account to save your own private contacts.
           </p>
         </div>
       ) : null}

@@ -6,9 +6,11 @@ import { SectionCard } from "@/components/section-card";
 import { useAuth } from "@/components/auth-provider";
 import { useContacts } from "@/components/contacts-provider";
 import {
+  getConversationPrep,
   formatDate,
   formatOptionalDate,
   formatProfessionalSummary,
+  getDaysSinceLastContact,
   getFollowUpsDueThisWeek,
   getInactiveContacts,
   getLastContactDate,
@@ -23,26 +25,26 @@ export default function DashboardPage() {
   const dueThisWeek = getFollowUpsDueThisWeek(contacts);
   const inactiveContacts = getInactiveContacts(contacts);
   const recentlyAddedContacts = getRecentlyAddedContacts(contacts);
+  const prepContacts = [...overdueFollowUps, ...dueThisWeek]
+    .filter((contact, index, allContacts) =>
+      allContacts.findIndex((item) => item.id === contact.id) === index,
+    )
+    .slice(0, 4);
 
   return (
     <div className="page-stack">
       <section className="hero">
         <div>
-          <p className="eyebrow">{currentUser ? "Your dashboard" : "Sample dashboard"}</p>
-          <h1>
-            {currentUser
-              ? "Stay warm with the people in your network."
-              : "Try a polished networking CRM before creating an account."}
-          </h1>
+          <p className="eyebrow">Dashboard</p>
+          <h1>Never forget who to follow up with again</h1>
           <p className="hero-copy">
-            {currentUser
-              ? "Track where you met, remember key notes, and keep up with follow-ups before opportunities go cold."
-              : "Browse a sample student-friendly CRM, add up to 3 trial contacts, and see how notes, follow-ups, and conversation prep work."}
+            Keep notes for your future self so every conversation picks up right where
+            you left off.
           </p>
         </div>
         <div className="hero-actions">
           <Link className="button button-primary" href="/contacts/new">
-            {currentUser ? "Add a contact" : "Try adding a contact"}
+            {currentUser ? "Add a contact" : "Add your first contact"}
           </Link>
           {currentUser ? (
             <Link className="button button-secondary" href="/contacts">
@@ -64,6 +66,13 @@ export default function DashboardPage() {
 
       <section className="dashboard-grid">
         <article className="content-panel dashboard-panel">
+          <p className="dashboard-callout">
+            {overdueFollowUps.length > 0
+              ? `You should reach out to ${overdueFollowUps.length} ${
+                  overdueFollowUps.length === 1 ? "person" : "people"
+                } today.`
+              : "You are caught up for today."}
+          </p>
           <div className="panel-header">
             <div>
               <p className="eyebrow">Action now</p>
@@ -150,6 +159,13 @@ export default function DashboardPage() {
                   <p className="list-card-meta">
                     Last contact: {formatDate(getLastContactDate(contact))}
                   </p>
+                  <div className="suggested-follow-up-card">
+                    <p className="prep-label">
+                      You haven&apos;t talked to {contact.name} in{" "}
+                      {getDaysSinceLastContact(contact) ?? 60} days
+                    </p>
+                    <p className="notes-copy">💬 {getConversationPrep(contact).suggestedMessage}</p>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -170,7 +186,7 @@ export default function DashboardPage() {
           {recentlyAddedContacts.length === 0 ? (
             <EmptyState
               title="No contacts added yet"
-              description="Start your CRM with the first person you want to stay in touch with."
+              description="Start your Keeply workspace with the first person you want to stay in touch with."
               actionLabel="Add your first contact"
               actionHref="/contacts/new"
             />
@@ -193,6 +209,72 @@ export default function DashboardPage() {
             </div>
           )}
         </article>
+      </section>
+
+      <section className="content-panel dashboard-panel">
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow">Prepare</p>
+            <h2>Prepare for your next conversation</h2>
+          </div>
+        </div>
+
+        {prepContacts.length === 0 ? (
+          <p className="section-copy">
+            Once you schedule a follow-up, Keeply will help you prep here.
+          </p>
+        ) : (
+          <div className="conversation-prep-list">
+            {prepContacts.map((contact) => {
+              const prep = getConversationPrep(contact);
+
+              return (
+                <Link
+                  key={contact.id}
+                  href={`/contacts/${contact.id}`}
+                  className="conversation-prep-card"
+                >
+                  <div className="action-card-top">
+                    <div>
+                      <h3>{contact.name}</h3>
+                      <p>{formatProfessionalSummary(contact)}</p>
+                    </div>
+                    <span className="status-pill status-neutral">
+                      {contact.nextFollowUpDate
+                        ? formatOptionalDate(contact.nextFollowUpDate)
+                        : "Prep"}
+                    </span>
+                  </div>
+
+                  <div className="prep-meta-grid">
+                    <div>
+                      <p className="prep-label">Last talked</p>
+                      <p className="list-card-meta">
+                        {getLastContactDate(contact)
+                          ? formatDate(getLastContactDate(contact))
+                          : "No date yet"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="prep-label">Topics</p>
+                      <p className="list-card-meta">
+                        {prep.keyTopics.slice(0, 2).join(" • ") || "No topics yet"}
+                      </p>
+                    </div>
+
+                    <div className="prep-meta-wide">
+                      <p className="prep-label">Suggested follow-up</p>
+                      <p className="list-card-meta">
+                        {prep.followUpTalkingPoints[0] || prep.suggestedMessage}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
