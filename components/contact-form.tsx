@@ -123,7 +123,7 @@ export function ContactForm({
       ) : null}
 
       <p className="helper-text form-note">
-        You can start with just a name-add more later.
+        Start with just a name. You can fill in the rest later.
       </p>
 
       <div className="form-grid">

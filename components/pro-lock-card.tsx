@@ -30,7 +30,10 @@ export function ProLockCard({
             <Link href="/signup" className="button button-primary">
               Create an account
             </Link>
-            <UpgradeButton className="button button-secondary" />
+            <UpgradeButton
+              className="button button-secondary"
+              label="See what Pro unlocks"
+            />
           </>
         )}
       </div>

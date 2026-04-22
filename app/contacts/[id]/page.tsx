@@ -120,8 +120,8 @@ export default function ContactDetailPage() {
       <section className="content-panel prep-panel">
         <div className="panel-header">
           <div>
-            <p className="eyebrow">Conversation prep</p>
-            <h2>Quick reconnect notes</h2>
+            <p className="eyebrow">Signature feature</p>
+            <h2>What to say next</h2>
           </div>
         </div>
 
@@ -152,7 +152,8 @@ export default function ContactDetailPage() {
 
             <article className="prep-card prep-card-wide">
               <div className="suggested-follow-up-card">
-                <p className="prep-label">Suggested follow-up</p>
+                <p className="prep-label prep-emphasis-label">What to say next</p>
+                <p className="prompt-copy">You could say:</p>
                 <p className="notes-copy">{conversationPrep.suggestedMessage}</p>
               </div>
             </article>
@@ -175,7 +176,8 @@ export default function ContactDetailPage() {
 
             <article className="prep-card prep-card-wide">
               <div className="suggested-follow-up-card preview-follow-up-card">
-                <p className="prep-label">Preview: Suggested follow-up</p>
+                <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
+                <p className="prompt-copy">You could say:</p>
                 <p className="notes-copy">
                   {getPreviewText(conversationPrep.suggestedMessage, 18)}
                 </p>
@@ -189,8 +191,8 @@ export default function ContactDetailPage() {
           <ProLockCard
             title={
               isGuestMode
-                ? "Add one of your 3 demo contacts to preview conversation prep"
-                : "Upgrade to unlock conversation prep"
+                ? "Add one of your 3 demo contacts to preview what to say next"
+                : "Unlock smarter follow-ups with Pro"
             }
             description={
               isGuestMode

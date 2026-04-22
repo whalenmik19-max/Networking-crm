@@ -116,8 +116,8 @@ h3 {
   flex-wrap: wrap;
   padding: 0.24rem;
   border-radius: var(--radius-pill);
-  background: var(--surface-tint);
-  border: 1px solid rgba(18, 44, 91, 0.07);
+  background: rgba(244, 250, 251, 0.72);
+  border: 1px solid rgba(18, 44, 91, 0.05);
 }
 
 .nav-link {
@@ -146,6 +146,13 @@ h3 {
   transition: background-color 160ms ease, transform 160ms ease;
 }
 
+.nav-auth-button-muted {
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--accent-strong);
+  border: 1px solid rgba(18, 44, 91, 0.1);
+  box-shadow: none;
+}
+
 .header-primary-action {
   display: inline-flex;
   align-items: center;
@@ -169,6 +176,10 @@ h3 {
 
 .nav-auth-button:hover {
   background: #16386f;
+}
+
+.nav-auth-button-muted:hover {
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .nav-link:hover,
@@ -394,7 +405,12 @@ h3 {
   border-radius: 999px;
   padding: 0.8rem 1.15rem;
   font-weight: 600;
-  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .button-primary {
@@ -405,12 +421,19 @@ h3 {
 
 .button-primary:hover {
   background: linear-gradient(135deg, #21b8ac 0%, #148c98 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(23, 152, 165, 0.2);
 }
 
 .button-secondary {
   background: var(--surface-strong);
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+.button-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
 }
 
 .stats-grid,
@@ -562,6 +585,18 @@ h3 {
   align-content: start;
 }
 
+.priority-panel {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.priority-panel h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.6vw, 2.2rem);
+  letter-spacing: -0.03em;
+}
+
 .action-list {
   display: grid;
   gap: 0.8rem;
@@ -586,6 +621,7 @@ h3 {
 .conversation-prep-card:hover {
   border-color: rgba(33, 92, 74, 0.2);
   background: rgba(255, 255, 255, 0.92);
+  transform: translateY(-1px);
 }
 
 .prep-meta-grid {
@@ -613,6 +649,7 @@ h3 {
 .action-card:hover {
   border-color: rgba(33, 92, 74, 0.2);
   background: rgba(255, 255, 255, 0.92);
+  transform: translateY(-1px);
 }
 
 .action-card h3 {
@@ -748,13 +785,14 @@ h3 {
   background: rgba(255, 255, 255, 0.78);
   border-color: var(--border);
   box-shadow: var(--shadow-soft);
-  transition: border-color 160ms ease, background-color 160ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
   cursor: pointer;
 }
 
 .contacts-table-link:hover {
   background: #edf4ef;
   border-color: rgba(33, 92, 74, 0.2);
+  transform: translateY(-1px);
 }
 
 .contact-name-cell {
@@ -1031,7 +1069,6 @@ h3 {
 .smart-reminder-lock {
   display: grid;
   gap: 0.55rem;
-  margin-bottom: 1rem;
   padding: 0.95rem 1rem;
   border-radius: var(--radius-card);
   border: 1px solid var(--border);
@@ -1039,10 +1076,18 @@ h3 {
 }
 
 .suggested-follow-up-card {
-  padding: 0.9rem 1rem;
+  padding: 1rem 1.05rem;
   border: 1px solid rgba(33, 92, 74, 0.16);
   border-radius: 16px;
-  background: rgba(228, 239, 233, 0.55);
+  background: linear-gradient(180deg, rgba(232, 248, 246, 0.9) 0%, rgba(228, 239, 233, 0.72) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.prep-message-card {
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(36, 200, 187, 0.16);
+  background: linear-gradient(180deg, rgba(232, 248, 246, 0.76) 0%, rgba(244, 250, 251, 0.92) 100%);
 }
 
 .locked-follow-up-card {
@@ -1053,6 +1098,18 @@ h3 {
 .preview-follow-up-card {
   background: rgba(232, 248, 246, 0.78);
   border-color: rgba(36, 200, 187, 0.18);
+}
+
+.prep-emphasis-label {
+  margin-bottom: 0.4rem;
+  color: #0f5f69;
+}
+
+.prompt-copy {
+  margin: 0 0 0.35rem;
+  color: var(--accent-strong);
+  font-size: 0.86rem;
+  font-weight: 700;
 }
 
 .blurred-copy {

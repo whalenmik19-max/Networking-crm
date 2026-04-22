@@ -57,7 +57,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           {currentUser ? (
-            <button type="button" className="nav-auth-button" onClick={logOut}>
+            <button
+              type="button"
+              className="nav-auth-button nav-auth-button-muted"
+              onClick={logOut}
+            >
               Log out
             </button>
           ) : (

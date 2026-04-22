@@ -87,6 +87,46 @@ export default function DashboardPage() {
         </section>
       ) : null}
 
+      <section className="content-panel priority-panel">
+        {isPro ? (
+          <>
+            <p className="eyebrow">Today&apos;s priority</p>
+            <h2>
+              {overdueFollowUps.length > 0
+                ? `You should reach out to ${overdueFollowUps.length} ${
+                    overdueFollowUps.length === 1 ? "person" : "people"
+                  } today.`
+                : "You&apos;re caught up for today."}
+            </h2>
+            <p className="section-copy">
+              {overdueFollowUps.length > 0
+                ? "Start with your overdue follow-ups first, then move into what is due this week."
+                : "Nothing is overdue right now, so you can focus on this week’s follow-ups and conversation prep."}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="eyebrow">Today&apos;s priority</p>
+            <h2>Let Keeply point you to the right follow-up first.</h2>
+            <p className="section-copy">
+              {isGuestMode
+                ? "Demo mode includes manual follow-up dates. Pro adds smart reminders and richer conversation prep once you create an account."
+                : "Free keeps your contacts and manual follow-up dates organized. Pro adds smart reminders and richer conversation prep."}
+            </p>
+            {isGuestMode ? (
+              <div className="hero-actions">
+                <Link href="/signup" className="button button-primary">
+                  Create an account
+                </Link>
+                <UpgradeButton className="button button-secondary" />
+              </div>
+            ) : (
+              <UpgradeButton />
+            )}
+          </>
+        )}
+      </section>
+
       <section className="stats-grid">
         <SectionCard title="Total contacts" value={String(contacts.length)} />
         <SectionCard title="Overdue" value={String(overdueFollowUps.length)} />
@@ -95,31 +135,6 @@ export default function DashboardPage() {
 
       <section className="dashboard-grid">
         <article className="content-panel dashboard-panel">
-          {isPro ? (
-            <p className="dashboard-callout">
-              {overdueFollowUps.length > 0
-                ? `You should reach out to ${overdueFollowUps.length} ${
-                    overdueFollowUps.length === 1 ? "person" : "people"
-                  } today.`
-                : "You are caught up for today."}
-            </p>
-          ) : (
-            <div className="smart-reminder-lock">
-              <p className="prep-label">Smart reminders are part of Pro</p>
-              <p className="helper-text">
-                {isGuestMode
-                  ? "Demo mode includes follow-up dates, but smart reminders unlock after signup on Pro."
-                  : "Upgrade to highlight who to reach out to today automatically."}
-              </p>
-              {isGuestMode ? (
-                <Link href="/signup" className="button button-secondary">
-                  Create an account
-                </Link>
-              ) : (
-                <UpgradeButton className="button button-secondary" />
-              )}
-            </div>
-          )}
           <div className="panel-header">
             <div>
               <p className="eyebrow">Action now</p>
@@ -208,17 +223,21 @@ export default function DashboardPage() {
                   </p>
                   {isPro ? (
                     <div className="suggested-follow-up-card">
-                      <p className="prep-label">
-                        You haven&apos;t talked to {contact.name} in{" "}
-                        {getDaysSinceLastContact(contact) ?? 60} days
+                      <p className="prep-label prep-emphasis-label">What to say next</p>
+                      <p className="notes-copy prompt-copy">
+                        You could say:
                       </p>
                       <p className="notes-copy">
                         {getConversationPrep(contact).suggestedMessage}
                       </p>
+                      <p className="helper-text">
+                        You haven&apos;t talked to {contact.name} in{" "}
+                        {getDaysSinceLastContact(contact) ?? 60} days
+                      </p>
                     </div>
                   ) : isGuestMode && !isSampleContact(contact.id) ? (
                     <div className="suggested-follow-up-card preview-follow-up-card">
-                      <p className="prep-label">Preview: Suggested follow-up</p>
+                      <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
                       <p className="notes-copy">
                         {getPreviewText(getConversationPrep(contact).suggestedMessage, 18)}
                       </p>
@@ -230,8 +249,8 @@ export default function DashboardPage() {
                     <div className="suggested-follow-up-card locked-follow-up-card">
                       <p className="prep-label">
                         {isFree
-                          ? "Upgrade to unlock suggested follow-ups"
-                          : "Add your own demo contacts to preview suggested follow-ups"}
+                          ? "Unlock smarter follow-ups with Pro"
+                          : "Add your own demo contacts to preview what to say next"}
                       </p>
                       <p className="notes-copy blurred-copy">
                         {isFree
@@ -260,7 +279,7 @@ export default function DashboardPage() {
           {recentlyAddedContacts.length === 0 ? (
             <EmptyState
               title="No contacts added yet"
-              description="Start your Keeply workspace with the first person you want to stay in touch with."
+              description="Add someone you met recently. Keeply will help you remember what to say next."
               actionLabel="Add your first contact"
               actionHref="/contacts/new"
             />
@@ -288,8 +307,8 @@ export default function DashboardPage() {
       <section className="content-panel dashboard-panel">
         <div className="panel-header">
           <div>
-            <p className="eyebrow">Prepare</p>
-            <h2>Prepare for your next conversation</h2>
+            <p className="eyebrow">Signature feature</p>
+            <h2>What to say next</h2>
           </div>
           {!isPro && isFree ? <UpgradeButton className="button button-secondary" /> : null}
         </div>
@@ -330,8 +349,9 @@ export default function DashboardPage() {
                       </p>
                     </div>
 
-                    <div className="prep-meta-wide">
-                      <p className="prep-label">Suggested follow-up preview</p>
+                    <div className="prep-meta-wide prep-message-card">
+                      <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
+                      <p className="prompt-copy">You could say:</p>
                       <p className="list-card-meta">
                         {getPreviewText(prep.suggestedMessage, 16)}
                       </p>
@@ -345,13 +365,13 @@ export default function DashboardPage() {
           <ProLockCard
             title={
               isGuestMode
-                ? "Add up to 3 demo contacts to preview conversation prep"
-                : "Upgrade to unlock conversation prep"
+                ? "Add up to 3 demo contacts to preview what to say next"
+                : "Unlock smarter follow-ups with Pro"
             }
             description={
               isGuestMode
                 ? "Guests can preview suggested follow-ups and prep on the first 3 contacts they add. Full insights stay on Pro."
-                : "Pro gives you AI-powered follow-ups, quick talking points, and prep insights before you reconnect."
+                : "Pro gives you AI-powered follow-ups, quick talking points, and prep notes before you reconnect."
             }
           />
         ) : prepContacts.length === 0 ? (
@@ -398,8 +418,9 @@ export default function DashboardPage() {
                       </p>
                     </div>
 
-                    <div className="prep-meta-wide">
-                      <p className="prep-label">Suggested follow-up</p>
+                    <div className="prep-meta-wide prep-message-card">
+                      <p className="prep-label prep-emphasis-label">What to say next</p>
+                      <p className="prompt-copy">You could say:</p>
                       <p className="list-card-meta">
                         {prep.followUpTalkingPoints[0] || prep.suggestedMessage}
                       </p>

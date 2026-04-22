@@ -6,7 +6,7 @@ type UpgradeButtonProps = {
 };
 
 export function UpgradeButton({
-  label = "Upgrade to Pro",
+  label = "Unlock smarter follow-ups with Pro",
   className = "button button-primary",
 }: UpgradeButtonProps) {
   return (

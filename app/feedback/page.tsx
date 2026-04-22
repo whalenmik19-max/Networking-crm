@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function FeedbackPage() {
   const [message, setMessage] = useState("");
@@ -19,30 +20,23 @@ export default function FeedbackPage() {
     }
 
     setIsSending(true);
+    const supabase = getSupabaseBrowserClient();
 
-    const response = await fetch("/api/feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        category,
-        message: trimmedMessage,
-      }),
+    const { error } = await supabase.from("feedback_submissions").insert({
+      category,
+      message: trimmedMessage,
     });
-
-    const data = (await response.json()) as { error?: string };
 
     setIsSending(false);
 
-    if (!response.ok) {
-      setStatus(data.error ?? "We couldn't send your feedback right now.");
+    if (error) {
+      setStatus("We couldn't send your feedback right now.");
       return;
     }
 
     setMessage("");
     setCategory("general");
-    setStatus("Thanks for the feedback. It was sent to the Keeply admin inbox.");
+    setStatus("Thanks for the feedback. It was sent for admin review.");
   }
 
   return (

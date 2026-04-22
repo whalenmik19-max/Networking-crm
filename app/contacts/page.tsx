@@ -106,8 +106,8 @@ export default function ContactsPage() {
       {contacts.length === 0 ? (
         <EmptyState
           title="Your contact list is empty"
-          description="Add your first networking contact to start building your Keeply workspace."
-          actionLabel="Create contact"
+          description="Add someone you met recently. Keeply will help you remember what to say next."
+          actionLabel="Add Contact"
           actionHref="/contacts/new"
         />
       ) : filteredContacts.length === 0 ? (
