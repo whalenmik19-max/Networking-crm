@@ -60,6 +60,9 @@ If you want shared, synced contacts later, the next step would be storing contac
    ```bash
    NEXT_PUBLIC_SUPABASE_URL=your-project-url
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   FEEDBACK_TO_EMAIL=your-admin-email@example.com
+   FEEDBACK_FROM_EMAIL=Keeply Feedback <onboarding@resend.dev>
+   RESEND_API_KEY=your-resend-api-key
    ```
 
 5. Start the development server:
@@ -165,6 +168,9 @@ networking-crm/
 
 - `components/contacts-provider.tsx`
   A React context that stores contacts in memory and syncs them to `localStorage`, using the logged-in user's ID to keep each person's contact list separate.
+
+- `app/api/feedback/route.ts`
+  A server-side route that forwards feedback submissions to the admin email address without exposing that destination in the public UI.
 
 - `lib/sample-contacts.ts`
   Starter data so the app is not empty on first load.

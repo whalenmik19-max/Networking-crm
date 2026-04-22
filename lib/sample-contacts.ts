@@ -94,3 +94,9 @@ export const sampleContacts: Contact[] = [
     ],
   },
 ];
+
+export const sampleContactIds = new Set(sampleContacts.map((contact) => contact.id));
+
+export function isSampleContact(contactId: string) {
+  return sampleContactIds.has(contactId);
+}

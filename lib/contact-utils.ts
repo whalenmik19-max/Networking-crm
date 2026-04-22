@@ -188,6 +188,63 @@ export function getRecentlyAddedContacts(contacts: Contact[]) {
     .slice(0, 6);
 }
 
+function getRelationshipPriority(contact: Contact) {
+  const normalizedType = contact.relationshipType.trim().toLowerCase();
+
+  if (["mentor", "recruiter", "professor", "alum"].includes(normalizedType)) {
+    return 3;
+  }
+
+  if (["peer", "friend"].includes(normalizedType)) {
+    return 2;
+  }
+
+  return 1;
+}
+
+function getFollowUpPriority(contact: Contact) {
+  const today = getTodayString();
+  const endOfWeek = getEndOfWeekString();
+
+  if (contact.nextFollowUpDate && contact.nextFollowUpDate < today) {
+    return 4;
+  }
+
+  if (
+    contact.nextFollowUpDate &&
+    contact.nextFollowUpDate >= today &&
+    contact.nextFollowUpDate <= endOfWeek
+  ) {
+    return 3;
+  }
+
+  if ((getDaysSinceLastContact(contact) ?? 0) >= 60) {
+    return 2;
+  }
+
+  return 1;
+}
+
+function getPriorityScore(contact: Contact) {
+  return getFollowUpPriority(contact) * 10 + getRelationshipPriority(contact);
+}
+
+export function getPrioritySortedContacts(contacts: Contact[]) {
+  return [...contacts].sort((first, second) => {
+    const scoreDifference = getPriorityScore(second) - getPriorityScore(first);
+
+    if (scoreDifference !== 0) {
+      return scoreDifference;
+    }
+
+    if (first.nextFollowUpDate && second.nextFollowUpDate) {
+      return first.nextFollowUpDate.localeCompare(second.nextFollowUpDate);
+    }
+
+    return first.name.localeCompare(second.name);
+  });
+}
+
 function getShortSentence(text: string, fallback: string) {
   const firstSentence = text
     .split(/[.!?]/)
@@ -243,4 +300,14 @@ export function getConversationPrep(contact: Contact): ConversationPrep {
     followUpTalkingPoints,
     suggestedMessage,
   };
+}
+
+export function getPreviewText(text: string, wordLimit = 14) {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+
+  if (words.length <= wordLimit) {
+    return text;
+  }
+
+  return `${words.slice(0, wordLimit).join(" ")}...`;
 }

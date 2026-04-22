@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useAuth } from "@/components/auth-provider";
-import { sampleContacts } from "@/lib/sample-contacts";
+import { sampleContactIds, sampleContacts } from "@/lib/sample-contacts";
 import type {
   Contact,
   NewContact,
@@ -22,14 +22,15 @@ type ContactsContextValue = {
   guestContactsRemaining: number;
   addContact: (contact: NewContact) => Contact | undefined;
   updateContact: (contactId: string, updates: NewContact) => Contact | undefined;
+  deleteContact: (contactId: string) => void;
   addInteraction: (contactId: string, interaction: NewInteraction) => Contact | undefined;
   updateReminder: (contactId: string, reminderAt: string) => void;
+  clearCurrentUserContacts: () => void;
 };
 
 const ContactsContext = createContext<ContactsContextValue | undefined>(undefined);
 const storageKey = "networking-crm-contacts-by-user";
 const guestStorageKey = "networking-crm-guest-contacts";
-const sampleContactIds = new Set(sampleContacts.map((contact) => contact.id));
 const guestContactLimit = 3;
 
 function normalizeContact(contact: Partial<Contact>): Contact {
@@ -58,7 +59,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const [guestContacts, setGuestContacts] = useState<Contact[]>(sampleContacts);
   const [hasLoadedContacts, setHasLoadedContacts] = useState(false);
 
-  const contacts = currentUser ? contactsByUser[currentUser.id] ?? sampleContacts : guestContacts;
+  const contacts = currentUser ? contactsByUser[currentUser.id] ?? [] : guestContacts;
   const guestCreatedContactsCount = guestContacts.filter(
     (contact) => !sampleContactIds.has(contact.id),
   ).length;
@@ -111,7 +112,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
 
     setContactsByUser((current) => ({
       ...current,
-      [currentUser.id]: updater(current[currentUser.id] ?? sampleContacts),
+      [currentUser.id]: updater(current[currentUser.id] ?? []),
     }));
   }
 
@@ -169,6 +170,16 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
 
           return updatedContact;
         },
+        deleteContact: (contactId) => {
+          const updater = (current: Contact[]) =>
+            current.filter((contact) => contact.id !== contactId);
+
+          if (isGuestMode) {
+            updateGuestContacts(updater);
+          } else {
+            updateCurrentUserContacts(updater);
+          }
+        },
         addInteraction: (contactId, interaction) => {
           const newInteraction = {
             id: crypto.randomUUID(),
@@ -212,6 +223,17 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
           } else {
             updateCurrentUserContacts(updater);
           }
+        },
+        clearCurrentUserContacts: () => {
+          if (!currentUser) {
+            return;
+          }
+
+          setContactsByUser((current) => {
+            const nextState = { ...current };
+            delete nextState[currentUser.id];
+            return nextState;
+          });
         },
       }}
     >

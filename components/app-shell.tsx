@@ -3,18 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
-
-const navItems = [
-  { href: "/", label: "Dashboard" },
-  { href: "/contacts", label: "Contacts" },
-  { href: "/contacts/new", label: "Add Contact" },
-  { href: "/feedback", label: "Feedback" },
-];
+import { LogoMark } from "@/components/logo-mark";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { currentUser, isGuestMode, logOut } = useAuth();
   const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const navItems = [
+    { href: "/", label: "Dashboard" },
+    { href: "/contacts", label: "Contacts" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/feedback", label: "Feedback" },
+    ...(currentUser ? [{ href: "/settings", label: "Settings" }] : []),
+  ];
 
   if (isAuthPage) {
     return <main>{children}</main>;
@@ -24,35 +25,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="app-shell">
       <header className="site-header">
         <Link href="/" className="brand">
+          <LogoMark />
           <span className="brand-mark">Keeply</span>
         </Link>
 
-        <nav className="nav" aria-label="Main navigation">
-          {navItems.map((item) => {
-            const isActive =
-              item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
+        <div className="header-actions">
+          <nav className="nav" aria-label="Main navigation">
+            {navItems.map((item) => {
+              const isActive =
+                item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-link ${isActive ? "active" : ""}`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-link ${isActive ? "active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <Link
+            href="/contacts/new"
+            className={`header-primary-action ${
+              pathname === "/contacts/new" ? "is-active" : ""
+            }`}
+          >
+            + Add Contact
+          </Link>
 
           {currentUser ? (
-            <button type="button" className="nav-link nav-button" onClick={logOut}>
+            <button type="button" className="nav-auth-button" onClick={logOut}>
               Log out
             </button>
           ) : (
-            <Link href="/login" className="nav-link active">
-              Log in / Sign up
+            <Link href="/login" className="nav-auth-button">
+              Login/Sign Up
             </Link>
           )}
-        </nav>
+        </div>
       </header>
 
       {currentUser ? (

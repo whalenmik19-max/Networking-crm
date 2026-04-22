@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { UpgradeButton } from "@/components/upgrade-button";
+import { useAuth } from "@/components/auth-provider";
 import { EmptyState } from "@/components/empty-state";
 import { useContacts } from "@/components/contacts-provider";
 import {
@@ -9,27 +11,35 @@ import {
   formatOptionalDate,
   formatProfessionalSummary,
   getInitials,
+  getPrioritySortedContacts,
   searchContacts,
 } from "@/lib/contact-utils";
+import { isProPlan } from "@/lib/plans";
 
 export default function ContactsPage() {
-  const { contacts } = useContacts();
+  const { currentUser } = useAuth();
+  const { contacts, guestContactsRemaining, isGuestMode } = useContacts();
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredContacts = searchContacts(contacts, searchQuery);
+  const prioritizedContacts = isProPlan(currentUser?.plan)
+    ? getPrioritySortedContacts(contacts)
+    : contacts;
+  const filteredContacts = searchContacts(prioritizedContacts, searchQuery);
 
   return (
     <div className="page-stack">
-      <section className="page-header">
-        <div>
+      <section className="page-header page-header-balanced">
+        <div className="page-header-content-block">
           <p className="eyebrow">Contacts</p>
           <h1>All relationships in one place</h1>
           <p className="section-copy">
             Browse your network, review notes, and jump into the next best follow-up.
           </p>
         </div>
-        <Link className="button button-primary" href="/contacts/new">
-          Add contact
-        </Link>
+        <div className="page-header-side-action">
+          <Link className="button button-primary page-header-inline-action" href="/contacts/new">
+            Add Contact
+          </Link>
+        </div>
       </section>
 
       <section className="content-panel search-panel">
@@ -50,6 +60,48 @@ export default function ContactsPage() {
       <p className="helper-text table-hint">
         Click a contact to view notes and prep your next conversation.
       </p>
+
+      {isGuestMode && guestContactsRemaining === 0 ? (
+        <section className="trial-banner demo-limit-banner">
+          <div>
+            <p className="eyebrow">Demo limit reached</p>
+            <p className="section-copy">
+              You&apos;ve used all 3 demo contacts. Create an account to keep building your
+              own workspace, or view Pro for the full experience.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <Link href="/signup" className="button button-primary">
+              Create an account
+            </Link>
+            <UpgradeButton className="button button-secondary" />
+          </div>
+        </section>
+      ) : null}
+
+      {isProPlan(currentUser?.plan) ? (
+        <p className="helper-text table-hint">
+          Pro sorting is on, so overdue and high-priority relationships float to the top.
+        </p>
+      ) : (
+        <section className="content-panel pro-inline-banner">
+          <div>
+            <p className="eyebrow">Pro sorting</p>
+            <p className="section-copy">
+              {isGuestMode
+                ? "Priority sorting is reserved for Pro after you create an account."
+                : "Upgrade to sort contacts by overdue follow-ups and your most important relationships."}
+            </p>
+          </div>
+          {isGuestMode ? (
+            <Link href="/signup" className="button button-secondary">
+              Sign up to continue
+            </Link>
+          ) : (
+            <UpgradeButton className="button button-secondary" />
+          )}
+        </section>
+      )}
 
       {contacts.length === 0 ? (
         <EmptyState

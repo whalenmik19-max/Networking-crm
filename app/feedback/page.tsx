@@ -1,64 +1,64 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-
-type FeedbackEntry = {
-  id: string;
-  message: string;
-  category: string;
-  createdAt: string;
-};
-
-const feedbackStorageKey = "keeply-feedback";
+import { FormEvent, useState } from "react";
 
 export default function FeedbackPage() {
   const [message, setMessage] = useState("");
   const [category, setCategory] = useState("general");
   const [status, setStatus] = useState("");
-  const [entries, setEntries] = useState<FeedbackEntry[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
-  useEffect(() => {
-    const storedEntries = window.localStorage.getItem(feedbackStorageKey);
-
-    if (storedEntries) {
-      setEntries(JSON.parse(storedEntries) as FeedbackEntry[]);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(feedbackStorageKey, JSON.stringify(entries));
-  }, [entries]);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setStatus("");
 
-    const newEntry: FeedbackEntry = {
-      id: crypto.randomUUID(),
-      message: message.trim(),
-      category,
-      createdAt: new Date().toISOString(),
-    };
+    const trimmedMessage = message.trim();
 
-    setEntries((current) => [newEntry, ...current]);
+    if (!trimmedMessage) {
+      return;
+    }
+
+    setIsSending(true);
+
+    const response = await fetch("/api/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        category,
+        message: trimmedMessage,
+      }),
+    });
+
+    const data = (await response.json()) as { error?: string };
+
+    setIsSending(false);
+
+    if (!response.ok) {
+      setStatus(data.error ?? "We couldn't send your feedback right now.");
+      return;
+    }
+
     setMessage("");
     setCategory("general");
-    setStatus("Thanks for the feedback. It was saved on this device.");
+    setStatus("Thanks for the feedback. It was sent to the Keeply admin inbox.");
   }
 
   return (
     <div className="page-stack">
-      <section className="page-header">
-        <div>
+      <section className="page-header feedback-header">
+        <div className="page-header-content-block">
           <p className="eyebrow">Feedback</p>
-          <h1>Tell us what would make Keeply better</h1>
-          <p className="section-copy">
-            Share ideas, bugs, or small frustrations. This feedback page keeps things simple
-            and stores submissions on this browser.
+          <h1 className="page-header-title-nowrap">Tell us what would make Keeply better</h1>
+          <p className="section-copy feedback-header-copy">
+            Share ideas, bugs, or small frustrations. Feedback is sent for admin review to
+            help improve Keeply.
           </p>
         </div>
       </section>
 
-      <section className="detail-grid detail-grid-wide">
+      <section>
         <form className="form-panel" onSubmit={handleSubmit}>
           <div className="field">
             <label htmlFor="feedback-category">Feedback type</label>
@@ -88,40 +88,11 @@ export default function FeedbackPage() {
           {status ? <p className="feedback-success">{status}</p> : null}
 
           <div className="form-actions">
-            <button type="submit" className="button button-primary">
-              Send feedback
+            <button type="submit" className="button button-primary" disabled={isSending}>
+              {isSending ? "Sending..." : "Send feedback"}
             </button>
           </div>
         </form>
-
-        <section className="content-panel feedback-panel">
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">Saved on this browser</p>
-              <h2>Recent feedback</h2>
-            </div>
-          </div>
-
-          {entries.length === 0 ? (
-            <p className="section-copy">
-              No feedback saved yet. Submit your first idea or bug report here.
-            </p>
-          ) : (
-            <div className="action-list">
-              {entries.map((entry) => (
-                <article key={entry.id} className="action-card">
-                  <div className="action-card-top">
-                    <p className="prep-label">{entry.category}</p>
-                    <span className="status-pill status-neutral">
-                      {new Date(entry.createdAt).toLocaleDateString("en-US")}
-                    </span>
-                  </div>
-                  <p className="notes-copy">{entry.message}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
       </section>
     </div>
   );

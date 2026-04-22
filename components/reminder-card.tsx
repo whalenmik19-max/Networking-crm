@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ProLockCard } from "@/components/pro-lock-card";
+import { useAuth } from "@/components/auth-provider";
 import { useContacts } from "@/components/contacts-provider";
 import { formatOptionalDateTime } from "@/lib/contact-utils";
+import { isProPlan } from "@/lib/plans";
 
 type ReminderCardProps = {
   contactId: string;
@@ -10,11 +13,13 @@ type ReminderCardProps = {
 };
 
 export function ReminderCard({ contactId, contactName }: ReminderCardProps) {
+  const { currentUser, isGuestMode } = useAuth();
   const { contacts, updateReminder } = useContacts();
   const contact = contacts.find((item) => item.id === contactId);
   const [scheduledFor, setScheduledFor] = useState(contact?.reminderAt ?? "");
   const [status, setStatus] = useState("");
   const timeoutRef = useRef<number | null>(null);
+  const canUseReminders = isProPlan(currentUser?.plan);
 
   useEffect(() => {
     setScheduledFor(contact?.reminderAt ?? "");
@@ -93,6 +98,26 @@ export function ReminderCard({ contactId, contactName }: ReminderCardProps) {
     updateReminder(contactId, "");
     setScheduledFor("");
     setStatus("Reminder cleared.");
+  }
+
+  if (!canUseReminders) {
+    return (
+      <article className="content-panel reminder-card">
+        <ProLockCard
+          eyebrow="Smart reminders"
+          title={
+            isGuestMode
+              ? "Smart reminders are available after signup on Pro"
+              : "Upgrade to unlock smart reminders"
+          }
+          description={
+            isGuestMode
+              ? `Try notes and follow-up dates in demo mode, then create an account to unlock reminders for ${contactName}.`
+              : `Set browser reminders for ${contactName} with Keeply Pro.`
+          }
+        />
+      </article>
+    );
   }
 
   return (

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ProLockCard } from "@/components/pro-lock-card";
+import { UpgradeButton } from "@/components/upgrade-button";
 import { EmptyState } from "@/components/empty-state";
 import { SectionCard } from "@/components/section-card";
 import { useAuth } from "@/components/auth-provider";
@@ -15,16 +17,24 @@ import {
   getInactiveContacts,
   getLastContactDate,
   getOverdueFollowUps,
+  getPreviewText,
   getRecentlyAddedContacts,
 } from "@/lib/contact-utils";
+import { isSampleContact } from "@/lib/sample-contacts";
+import { isProPlan } from "@/lib/plans";
 
 export default function DashboardPage() {
-  const { currentUser } = useAuth();
-  const { contacts } = useContacts();
+  const { currentUser, isGuestMode } = useAuth();
+  const { contacts, guestContactsRemaining } = useContacts();
+  const isPro = isProPlan(currentUser?.plan);
+  const isFree = Boolean(currentUser) && !isPro;
   const overdueFollowUps = getOverdueFollowUps(contacts);
   const dueThisWeek = getFollowUpsDueThisWeek(contacts);
   const inactiveContacts = getInactiveContacts(contacts);
   const recentlyAddedContacts = getRecentlyAddedContacts(contacts);
+  const guestPreviewContacts = isGuestMode
+    ? contacts.filter((contact) => !isSampleContact(contact.id)).slice(0, 3)
+    : [];
   const prepContacts = [...overdueFollowUps, ...dueThisWeek]
     .filter((contact, index, allContacts) =>
       allContacts.findIndex((item) => item.id === contact.id) === index,
@@ -33,19 +43,20 @@ export default function DashboardPage() {
 
   return (
     <div className="page-stack">
-      <section className="hero">
-        <div>
+      <section className={`hero ${!currentUser ? "hero-guest" : ""}`}>
+        <div className="hero-content-block">
           <p className="eyebrow">Dashboard</p>
-          <h1>Never forget who to follow up with again</h1>
-          <p className="hero-copy">
+          <h1>Never forget who to follow up with</h1>
+          <p className="hero-copy hero-copy-smart-wrap">
             Keep notes for your future self so every conversation picks up right where
             you left off.
           </p>
         </div>
-        <div className="hero-actions">
+        <div className={`hero-actions ${!currentUser ? "hero-actions-centered" : ""}`}>
           <Link className="button button-primary" href="/contacts/new">
             {currentUser ? "Add a contact" : "Add your first contact"}
           </Link>
+          {!isPro && currentUser ? <UpgradeButton /> : null}
           {currentUser ? (
             <Link className="button button-secondary" href="/contacts">
               View all contacts
@@ -58,6 +69,24 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {isGuestMode && guestContactsRemaining === 0 ? (
+        <section className="trial-banner demo-limit-banner">
+          <div>
+            <p className="eyebrow">Demo limit reached</p>
+            <p className="section-copy">
+              You&apos;ve used all 3 demo contacts. Create an account to keep adding more,
+              or view Pro to see the full Keeply workflow.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <Link href="/signup" className="button button-primary">
+              Create an account
+            </Link>
+            <UpgradeButton className="button button-secondary" />
+          </div>
+        </section>
+      ) : null}
+
       <section className="stats-grid">
         <SectionCard title="Total contacts" value={String(contacts.length)} />
         <SectionCard title="Overdue" value={String(overdueFollowUps.length)} />
@@ -66,13 +95,31 @@ export default function DashboardPage() {
 
       <section className="dashboard-grid">
         <article className="content-panel dashboard-panel">
-          <p className="dashboard-callout">
-            {overdueFollowUps.length > 0
-              ? `You should reach out to ${overdueFollowUps.length} ${
-                  overdueFollowUps.length === 1 ? "person" : "people"
-                } today.`
-              : "You are caught up for today."}
-          </p>
+          {isPro ? (
+            <p className="dashboard-callout">
+              {overdueFollowUps.length > 0
+                ? `You should reach out to ${overdueFollowUps.length} ${
+                    overdueFollowUps.length === 1 ? "person" : "people"
+                  } today.`
+                : "You are caught up for today."}
+            </p>
+          ) : (
+            <div className="smart-reminder-lock">
+              <p className="prep-label">Smart reminders are part of Pro</p>
+              <p className="helper-text">
+                {isGuestMode
+                  ? "Demo mode includes follow-up dates, but smart reminders unlock after signup on Pro."
+                  : "Upgrade to highlight who to reach out to today automatically."}
+              </p>
+              {isGuestMode ? (
+                <Link href="/signup" className="button button-secondary">
+                  Create an account
+                </Link>
+              ) : (
+                <UpgradeButton className="button button-secondary" />
+              )}
+            </div>
+          )}
           <div className="panel-header">
             <div>
               <p className="eyebrow">Action now</p>
@@ -159,13 +206,40 @@ export default function DashboardPage() {
                   <p className="list-card-meta">
                     Last contact: {formatDate(getLastContactDate(contact))}
                   </p>
-                  <div className="suggested-follow-up-card">
-                    <p className="prep-label">
-                      You haven&apos;t talked to {contact.name} in{" "}
-                      {getDaysSinceLastContact(contact) ?? 60} days
-                    </p>
-                    <p className="notes-copy">💬 {getConversationPrep(contact).suggestedMessage}</p>
-                  </div>
+                  {isPro ? (
+                    <div className="suggested-follow-up-card">
+                      <p className="prep-label">
+                        You haven&apos;t talked to {contact.name} in{" "}
+                        {getDaysSinceLastContact(contact) ?? 60} days
+                      </p>
+                      <p className="notes-copy">
+                        {getConversationPrep(contact).suggestedMessage}
+                      </p>
+                    </div>
+                  ) : isGuestMode && !isSampleContact(contact.id) ? (
+                    <div className="suggested-follow-up-card preview-follow-up-card">
+                      <p className="prep-label">Preview: Suggested follow-up</p>
+                      <p className="notes-copy">
+                        {getPreviewText(getConversationPrep(contact).suggestedMessage, 18)}
+                      </p>
+                      <p className="helper-text">
+                        Create an account and upgrade to Pro for the full version.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="suggested-follow-up-card locked-follow-up-card">
+                      <p className="prep-label">
+                        {isFree
+                          ? "Upgrade to unlock suggested follow-ups"
+                          : "Add your own demo contacts to preview suggested follow-ups"}
+                      </p>
+                      <p className="notes-copy blurred-copy">
+                        {isFree
+                          ? "Personalized reconnect messages are available on Pro."
+                          : "Guest mode gives you a limited preview on the first 3 contacts you add."}
+                      </p>
+                    </div>
+                  )}
                 </Link>
               ))}
             </div>
@@ -217,9 +291,70 @@ export default function DashboardPage() {
             <p className="eyebrow">Prepare</p>
             <h2>Prepare for your next conversation</h2>
           </div>
+          {!isPro && isFree ? <UpgradeButton className="button button-secondary" /> : null}
         </div>
 
-        {prepContacts.length === 0 ? (
+        {!isPro && isGuestMode && guestPreviewContacts.length > 0 ? (
+          <div className="conversation-prep-list">
+            {guestPreviewContacts.map((contact) => {
+              const prep = getConversationPrep(contact);
+
+              return (
+                <Link
+                  key={contact.id}
+                  href={`/contacts/${contact.id}`}
+                  className="conversation-prep-card"
+                >
+                  <div className="action-card-top">
+                    <div>
+                      <h3>{contact.name}</h3>
+                      <p>{formatProfessionalSummary(contact)}</p>
+                    </div>
+                    <span className="status-pill status-neutral">Preview</span>
+                  </div>
+
+                  <div className="prep-meta-grid">
+                    <div>
+                      <p className="prep-label">Last talked</p>
+                      <p className="list-card-meta">
+                        {getLastContactDate(contact)
+                          ? formatDate(getLastContactDate(contact))
+                          : "No date yet"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="prep-label">Topic preview</p>
+                      <p className="list-card-meta">
+                        {prep.keyTopics[0] || "Your notes will show up here"}
+                      </p>
+                    </div>
+
+                    <div className="prep-meta-wide">
+                      <p className="prep-label">Suggested follow-up preview</p>
+                      <p className="list-card-meta">
+                        {getPreviewText(prep.suggestedMessage, 16)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : !isPro ? (
+          <ProLockCard
+            title={
+              isGuestMode
+                ? "Add up to 3 demo contacts to preview conversation prep"
+                : "Upgrade to unlock conversation prep"
+            }
+            description={
+              isGuestMode
+                ? "Guests can preview suggested follow-ups and prep on the first 3 contacts they add. Full insights stay on Pro."
+                : "Pro gives you AI-powered follow-ups, quick talking points, and prep insights before you reconnect."
+            }
+          />
+        ) : prepContacts.length === 0 ? (
           <p className="section-copy">
             Once you schedule a follow-up, Keeply will help you prep here.
           </p>
