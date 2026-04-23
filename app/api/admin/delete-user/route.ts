@@ -43,6 +43,30 @@ async function deleteRowsForUser(
   return null;
 }
 
+async function deleteContactsWithCascade(userId: string, completedSteps: DeletionStep[]) {
+  const supabaseAdmin = getSupabaseAdminClient();
+  const { error } = await supabaseAdmin.from("contacts").delete().eq("user_id", userId);
+
+  if (error) {
+    console.error(error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to delete contact rows.",
+        code: "partial_deletion_failure",
+        failedStep: "contacts",
+        completedSteps,
+      },
+      { status: 500 },
+    );
+  }
+
+  completedSteps.push("contacts");
+  completedSteps.push("interactions");
+  completedSteps.push("reminders");
+  return null;
+}
+
 export async function POST(request: Request) {
   let body: DeleteUserRequestBody;
 
@@ -159,10 +183,13 @@ export async function POST(request: Request) {
   }
 
   const completedSteps: DeletionStep[] = [];
+  const contactDeleteFailure = await deleteContactsWithCascade(userId, completedSteps);
+
+  if (contactDeleteFailure) {
+    return contactDeleteFailure;
+  }
+
   const deletionTables: Array<{ table: string; step: DeletionStep }> = [
-    { table: "interactions", step: "interactions" },
-    { table: "reminders", step: "reminders" },
-    { table: "contacts", step: "contacts" },
     { table: "user_settings", step: "user_settings" },
     { table: "profiles", step: "profiles" },
     { table: "account_deletion_requests", step: "account_deletion_requests" },
