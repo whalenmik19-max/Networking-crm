@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { sampleContactIds, sampleContacts } from "@/lib/sample-contacts";
 import {
@@ -76,6 +76,61 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const guestContactsRemaining = Math.max(guestContactLimit - guestCreatedContactsCount, 0);
   const canAddContact = !isGuestMode || guestContactsRemaining > 0;
 
+  const loadSignedInContacts = useCallback(async () => {
+    if (!currentUser) {
+      setSignedInContacts([]);
+      setSignedInReminders([]);
+      setContactsError("");
+      setIsContactsLoading(false);
+      return [];
+    }
+
+    setIsContactsLoading(true);
+    setContactsError("");
+
+    try {
+      const nextContacts = await getSupabaseContacts();
+      const [interactionsByContact, reminders] = await Promise.all([
+        Promise.all(
+          nextContacts.map(async (contact: Contact) => ({
+            contactId: contact.id,
+            interactions: await getSupabaseInteractions(contact.id),
+          })),
+        ),
+        getSupabaseReminders(),
+      ]);
+
+      const contactsWithDetails = nextContacts.map((contact: Contact) => {
+        const matchingInteractions = interactionsByContact.find(
+          (entry: { contactId: string; interactions: Contact["interactions"] }) =>
+            entry.contactId === contact.id,
+        );
+        const matchingReminder = reminders.find(
+          (reminder: Reminder) => reminder.contactId === contact.id,
+        );
+
+        return normalizeContact({
+          ...contact,
+          interactions: matchingInteractions?.interactions ?? [],
+          reminderAt: matchingReminder?.remindAt ?? "",
+        });
+      });
+
+      setSignedInContacts(contactsWithDetails);
+      setSignedInReminders(reminders);
+      return contactsWithDetails;
+    } catch (error) {
+      setContactsError(
+        error instanceof Error ? error.message : "We couldn't load your contacts.",
+      );
+      setSignedInContacts([]);
+      setSignedInReminders([]);
+      return [];
+    } finally {
+      setIsContactsLoading(false);
+    }
+  }, [currentUser]);
+
   useEffect(() => {
     const storedGuestContacts = window.localStorage.getItem(guestStorageKey);
 
@@ -95,62 +150,10 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   }, [guestContacts, hasLoadedGuestContacts]);
 
   useEffect(() => {
-    async function loadSignedInContacts() {
-      if (!currentUser) {
-        setSignedInContacts([]);
-        setContactsError("");
-        setIsContactsLoading(false);
-        return;
-      }
-
-      setIsContactsLoading(true);
-      setContactsError("");
-
-      try {
-        const nextContacts = await getSupabaseContacts();
-        const [interactionsByContact, reminders] = await Promise.all([
-          Promise.all(
-            nextContacts.map(async (contact: Contact) => ({
-              contactId: contact.id,
-              interactions: await getSupabaseInteractions(contact.id),
-            })),
-          ),
-          getSupabaseReminders(),
-        ]);
-
-        const contactsWithDetails = nextContacts.map((contact: Contact) => {
-          const matchingInteractions = interactionsByContact.find(
-            (entry: { contactId: string; interactions: Contact["interactions"] }) =>
-              entry.contactId === contact.id,
-          );
-          const matchingReminder = reminders.find(
-            (reminder: Reminder) => reminder.contactId === contact.id,
-          );
-
-          return normalizeContact({
-            ...contact,
-            interactions: matchingInteractions?.interactions ?? [],
-            reminderAt: matchingReminder?.remindAt ?? "",
-          });
-        });
-
-        setSignedInContacts(contactsWithDetails);
-        setSignedInReminders(reminders);
-      } catch (error) {
-        setContactsError(
-          error instanceof Error ? error.message : "We couldn't load your contacts.",
-        );
-        setSignedInContacts([]);
-        setSignedInReminders([]);
-      } finally {
-        setIsContactsLoading(false);
-      }
-    }
-
     if (!isLoading) {
       void loadSignedInContacts();
     }
-  }, [currentUser, isLoading]);
+  }, [isLoading, loadSignedInContacts]);
 
   function updateGuestContacts(updater: (contacts: Contact[]) => Contact[]) {
     setGuestContacts((current) => updater(current));
@@ -284,26 +287,14 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
 
         try {
           const savedInteraction = await addSupabaseInteraction(contactId, interaction);
-          let updatedContact: Contact | undefined;
-
-          setSignedInContacts((current) =>
-            current.map((contact) => {
-              if (contact.id !== contactId) {
-                return contact;
-              }
-
-              updatedContact = {
-                ...contact,
-                interactions: [savedInteraction, ...contact.interactions].sort((first, second) =>
-                  second.date.localeCompare(first.date),
-                ),
-              };
-
-              return updatedContact;
-            }),
+          const refreshedContacts = await loadSignedInContacts();
+          return (
+            refreshedContacts.find((contact: Contact) => contact.id === contactId) ??
+            normalizeContact({
+              id: contactId,
+              interactions: [savedInteraction],
+            })
           );
-
-          return updatedContact;
         } catch (error) {
           setContactsError(
             error instanceof Error ? error.message : "We couldn't save this interaction.",
@@ -338,21 +329,16 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
             nextReminder = await addSupabaseReminder(contactId, reminderAt);
           }
 
-          setSignedInReminders((current) => {
-            const withoutCurrent = current.filter((reminder) => reminder.contactId !== contactId);
-            return nextReminder ? [...withoutCurrent, nextReminder] : withoutCurrent;
-          });
+          if (nextReminder) {
+            setSignedInReminders((current) => {
+              const withoutCurrent = current.filter(
+                (reminder) => reminder.contactId !== contactId,
+              );
+              return [...withoutCurrent, nextReminder];
+            });
+          }
 
-          setSignedInContacts((current) =>
-            current.map((contact) =>
-              contact.id === contactId
-                ? normalizeContact({
-                    ...contact,
-                    reminderAt: nextReminder?.remindAt ?? "",
-                  })
-                : contact,
-            ),
-          );
+          await loadSignedInContacts();
         } catch (error) {
           setContactsError(
             error instanceof Error ? error.message : "We couldn't save this reminder.",
@@ -372,6 +358,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       guestContactsRemaining,
       isContactsLoading,
       isGuestMode,
+      loadSignedInContacts,
     ],
   );
 

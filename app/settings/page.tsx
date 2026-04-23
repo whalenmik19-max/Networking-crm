@@ -5,13 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getUserSettings, updateUserSettings } from "@/lib/supabase/settings";
 import {
   type AccountDeletionRequest,
   defaultUserSettings,
   type UserSettings,
 } from "@/lib/settings";
-
-const settingsStorageKey = "keeply-user-settings";
 const deletionRequestsTable = "account_deletion_requests";
 
 type AccountDeletionRequestRow = {
@@ -102,12 +101,17 @@ export default function SettingsPage() {
         phone: currentUser.phone,
       });
 
-      const storedSettings = window.localStorage.getItem(settingsStorageKey);
-      const parsedSettings = storedSettings
-        ? (JSON.parse(storedSettings) as Record<string, Partial<UserSettings>>)
-        : {};
-
-      setSettings(normalizeSettings(currentUser, parsedSettings[currentUser.id]));
+      try {
+        const nextSettings = await getUserSettings();
+        setSettings(normalizeSettings(currentUser, nextSettings));
+      } catch (settingsError) {
+        setSettings(normalizeSettings(currentUser));
+        setError(
+          settingsError instanceof Error
+            ? settingsError.message
+            : "We couldn't load your settings.",
+        );
+      }
 
       const supabase = getSupabaseBrowserClient();
       const { data, error } = await supabase
@@ -171,6 +175,13 @@ export default function SettingsPage() {
       return;
     }
 
+    setProfileForm((current) => ({
+      ...current,
+      name: profileForm.name.trim(),
+      email: profileForm.email.trim().toLowerCase(),
+      phone: profileForm.phone.trim(),
+    }));
+
     setStatus(
       result.requiresEmailConfirmation
         ? "Profile saved. Check your inbox to confirm your new email address."
@@ -189,11 +200,6 @@ export default function SettingsPage() {
     setError("");
     setIsSavingPreferences(true);
 
-    const storedSettings = window.localStorage.getItem(settingsStorageKey);
-    const parsedSettings = storedSettings
-      ? (JSON.parse(storedSettings) as Record<string, UserSettings>)
-      : {};
-
     const planResult = await setPlan(settings.subscriptionPlan);
 
     if (!planResult.success) {
@@ -202,12 +208,19 @@ export default function SettingsPage() {
       return;
     }
 
-    const nextSettings = {
-      ...parsedSettings,
-      [currentUser.id]: settings,
-    };
+    try {
+      const savedSettings = await updateUserSettings(settings);
+      setSettings(savedSettings);
+    } catch (settingsSaveError) {
+      setIsSavingPreferences(false);
+      setError(
+        settingsSaveError instanceof Error
+          ? settingsSaveError.message
+          : "We couldn't save your settings.",
+      );
+      return;
+    }
 
-    window.localStorage.setItem(settingsStorageKey, JSON.stringify(nextSettings));
     setIsSavingPreferences(false);
     setStatus("Settings saved.");
   }

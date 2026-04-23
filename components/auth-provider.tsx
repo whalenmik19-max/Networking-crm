@@ -10,7 +10,7 @@ import {
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { normalizePlan, type Plan } from "@/lib/plans";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { ensureUserRecords } from "@/lib/supabase/profile";
+import { ensureUserRecords, syncProfileRow } from "@/lib/supabase/profile";
 
 type PublicAuthUser = {
   id: string;
@@ -201,6 +201,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (data.user) {
+          const { error: settingsError } = await supabase.from("user_settings").upsert(
+            {
+              user_id: data.user.id,
+              subscription_plan: plan,
+            },
+            { onConflict: "user_id" },
+          );
+
+          if (settingsError) {
+            console.error(settingsError);
+            return {
+              success: false,
+              error: "We couldn't update your plan settings.",
+            };
+          }
+
+          try {
+            await syncProfileRow(data.user);
+          } catch (profileError) {
+            return {
+              success: false,
+              error:
+                profileError instanceof Error
+                  ? profileError.message
+                  : "We couldn't update your profile.",
+            };
+          }
+
           setCurrentUser(toPublicUser(data.user));
         }
 
@@ -224,6 +252,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (data.user) {
+          try {
+            await syncProfileRow(data.user);
+          } catch (profileError) {
+            return {
+              success: false,
+              error:
+                profileError instanceof Error
+                  ? profileError.message
+                  : "We couldn't update your profile.",
+            };
+          }
+
           setCurrentUser(toPublicUser(data.user));
         }
 

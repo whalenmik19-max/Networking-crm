@@ -67,6 +67,7 @@ export async function getUserSettings() {
     .maybeSingle();
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't load your settings.");
   }
 
@@ -95,6 +96,7 @@ export async function updateUserSettings(settings: UserSettings) {
     .single();
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't save your settings.");
   }
 
