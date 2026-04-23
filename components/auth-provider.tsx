@@ -10,6 +10,7 @@ import {
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { normalizePlan, type Plan } from "@/lib/plans";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ensureUserRecords } from "@/lib/supabase/profile";
 
 type PublicAuthUser = {
   id: string;
@@ -76,6 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: { session },
       } = await supabase.auth.getSession();
 
+      if (session?.user) {
+        try {
+          await ensureUserRecords(session.user);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
       setCurrentUser(session?.user ? toPublicUser(session.user) : null);
       setIsLoading(false);
     }
@@ -86,8 +95,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
-      setCurrentUser(session?.user ? toPublicUser(session.user) : null);
-      setIsLoading(false);
+        if (session?.user) {
+          void ensureUserRecords(session.user).catch((error) => {
+            console.error(error);
+          });
+        }
+
+        setCurrentUser(session?.user ? toPublicUser(session.user) : null);
+        setIsLoading(false);
       },
     );
 
@@ -122,13 +137,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
         }
 
+        if (data.session?.user) {
+          try {
+            await ensureUserRecords(data.session.user);
+          } catch (setupError) {
+            return {
+              success: false,
+              error:
+                setupError instanceof Error
+                  ? setupError.message
+                  : "We couldn't set up your account.",
+            };
+          }
+        }
+
         return {
           success: true,
           requiresEmailConfirmation: !data.session,
         };
       },
       logIn: async ({ email, password }) => {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim().toLowerCase(),
           password,
         });
@@ -138,6 +167,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             success: false,
             error: error.message,
           };
+        }
+
+        if (data.user) {
+          try {
+            await ensureUserRecords(data.user);
+          } catch (setupError) {
+            return {
+              success: false,
+              error:
+                setupError instanceof Error
+                  ? setupError.message
+                  : "We couldn't finish loading your account.",
+            };
+          }
         }
 
         return { success: true };
