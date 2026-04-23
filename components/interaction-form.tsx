@@ -10,26 +10,37 @@ type InteractionFormProps = {
 
 export function InteractionForm({ contactId }: InteractionFormProps) {
   const { addInteraction } = useContacts();
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [formState, setFormState] = useState({
     date: "",
     type: "coffee chat",
     notes: "",
   });
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError("");
+    setIsSaving(true);
 
-    addInteraction(contactId, {
+    const updatedContact = await addInteraction(contactId, {
       date: formState.date,
       type: formState.type as (typeof interactionTypes)[number],
       notes: formState.notes.trim(),
     });
+
+    if (!updatedContact) {
+      setFormError("We couldn't save this interaction right now.");
+      setIsSaving(false);
+      return;
+    }
 
     setFormState({
       date: "",
       type: "coffee chat",
       notes: "",
     });
+    setIsSaving(false);
   }
 
   return (
@@ -86,9 +97,11 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
         </div>
       </div>
 
+      {formError ? <p className="auth-error">{formError}</p> : null}
+
       <div className="form-actions">
-        <button type="submit" className="button button-primary">
-          Save interaction
+        <button type="submit" className="button button-primary" disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save interaction"}
         </button>
       </div>
     </form>

@@ -50,13 +50,15 @@ export function ContactForm({
   const { addContact, updateContact, canAddContact, guestContactsRemaining, isGuestMode } =
     useContacts();
   const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [formState, setFormState] = useState<ContactFormState>(() =>
     buildFormState(initialContact),
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
+    setIsSaving(true);
 
     const contactData: NewContact = {
       name: formState.name.trim(),
@@ -79,21 +81,27 @@ export function ContactForm({
     };
 
     if (mode === "edit" && initialContact) {
-      const updatedContact = updateContact(initialContact.id, contactData);
+      const updatedContact = await updateContact(initialContact.id, contactData);
 
       if (updatedContact) {
         router.push(`/contacts/${updatedContact.id}`);
+        return;
       }
 
+      setFormError("We couldn't update this contact right now.");
+      setIsSaving(false);
       return;
     }
 
-    const contact = addContact(contactData);
+    const contact = await addContact(contactData);
 
     if (!contact) {
       setFormError(
-        "Demo mode lets you add up to 3 of your own contacts. Sign up to save more.",
+        isGuestMode
+          ? "Demo mode lets you add up to 3 of your own contacts. Sign up to save more."
+          : "We couldn't save this contact right now.",
       );
+      setIsSaving(false);
       return;
     }
 
@@ -257,8 +265,8 @@ export function ContactForm({
       {formError ? <p className="auth-error">{formError}</p> : null}
 
       <div className="form-actions">
-        <button type="submit" className="button button-primary">
-          {mode === "edit" ? "Update contact" : "Save contact"}
+        <button type="submit" className="button button-primary" disabled={isSaving}>
+          {isSaving ? (mode === "edit" ? "Updating..." : "Saving...") : mode === "edit" ? "Update contact" : "Save contact"}
         </button>
       </div>
     </form>

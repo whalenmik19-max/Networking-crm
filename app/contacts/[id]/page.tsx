@@ -21,8 +21,32 @@ export default function ContactDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { currentUser, isGuestMode } = useAuth();
-  const { contacts, deleteContact } = useContacts();
+  const { contacts, deleteContact, isContactsLoading, contactsError } = useContacts();
   const contact = contacts.find((item) => item.id === params.id);
+
+  if (isContactsLoading) {
+    return (
+      <div className="empty-page">
+        <div className="content-panel">
+          <p className="eyebrow">Contact detail</p>
+          <h1>Loading contact...</h1>
+          <p className="section-copy">We&apos;re pulling the latest details from Keeply.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!contact && contactsError) {
+    return (
+      <div className="empty-page">
+        <div className="content-panel">
+          <p className="eyebrow">Contact detail</p>
+          <h1>We couldn&apos;t load this contact.</h1>
+          <p className="section-copy">{contactsError}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!contact) {
     notFound();
@@ -33,7 +57,7 @@ export default function ContactDetailPage() {
   const isPro = isProPlan(currentUser?.plan);
   const isGuestPreviewContact = isGuestMode && !isSampleContact(activeContact.id);
 
-  function handleDeleteContact() {
+  async function handleDeleteContact() {
     const confirmed = window.confirm(
       `Delete ${activeContact.name} from Keeply? This cannot be undone.`,
     );
@@ -42,7 +66,7 @@ export default function ContactDetailPage() {
       return;
     }
 
-    deleteContact(activeContact.id);
+    await deleteContact(activeContact.id);
     router.push("/contacts");
   }
 

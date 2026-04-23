@@ -46,7 +46,7 @@ export function ReminderCard({ contactId, contactName }: ReminderCardProps) {
       new Notification(`Reach out to ${contactName}`, {
         body: `Time to follow up with ${contactName}.`,
       });
-      updateReminder(contactId, "");
+      void updateReminder(contactId, "");
       setStatus(`Reminder sent for ${contactName}.`);
     };
 
@@ -90,12 +90,12 @@ export function ReminderCard({ contactId, contactName }: ReminderCardProps) {
       return;
     }
 
-    updateReminder(contactId, scheduledFor);
+    await updateReminder(contactId, scheduledFor);
     setStatus(`Reminder set for ${formatOptionalDateTime(scheduledFor)}.`);
   }
 
-  function handleClearReminder() {
-    updateReminder(contactId, "");
+  async function handleClearReminder() {
+    await updateReminder(contactId, "");
     setScheduledFor("");
     setStatus("Reminder cleared.");
   }

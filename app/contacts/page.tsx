@@ -18,7 +18,8 @@ import { isProPlan } from "@/lib/plans";
 
 export default function ContactsPage() {
   const { currentUser } = useAuth();
-  const { contacts, guestContactsRemaining, isGuestMode } = useContacts();
+  const { contacts, guestContactsRemaining, isGuestMode, isContactsLoading, contactsError } =
+    useContacts();
   const [searchQuery, setSearchQuery] = useState("");
   const prioritizedContacts = isProPlan(currentUser?.plan)
     ? getPrioritySortedContacts(contacts)
@@ -60,6 +61,12 @@ export default function ContactsPage() {
       <p className="helper-text table-hint">
         Click a contact to view notes and prep your next conversation.
       </p>
+
+      {contactsError ? (
+        <section className="content-panel">
+          <p className="auth-error">{contactsError}</p>
+        </section>
+      ) : null}
 
       {isGuestMode && guestContactsRemaining === 0 ? (
         <section className="trial-banner demo-limit-banner">
@@ -103,7 +110,13 @@ export default function ContactsPage() {
         </section>
       )}
 
-      {contacts.length === 0 ? (
+      {isContactsLoading ? (
+        <section className="content-panel">
+          <p className="eyebrow">Contacts</p>
+          <h2>Loading your contacts...</h2>
+          <p className="section-copy">We&apos;re pulling in your private workspace now.</p>
+        </section>
+      ) : contacts.length === 0 ? (
         <EmptyState
           title="Your contact list is empty"
           description="Add someone you met recently. Keeply will help you remember what to say next."

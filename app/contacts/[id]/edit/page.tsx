@@ -7,8 +7,32 @@ import { useContacts } from "@/components/contacts-provider";
 
 export default function EditContactPage() {
   const params = useParams<{ id: string }>();
-  const { contacts } = useContacts();
+  const { contacts, isContactsLoading, contactsError } = useContacts();
   const contact = contacts.find((item) => item.id === params.id);
+
+  if (isContactsLoading) {
+    return (
+      <div className="empty-page">
+        <div className="content-panel">
+          <p className="eyebrow">Edit contact</p>
+          <h1>Loading contact...</h1>
+          <p className="section-copy">We&apos;re getting this record ready to edit.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!contact && contactsError) {
+    return (
+      <div className="empty-page">
+        <div className="content-panel">
+          <p className="eyebrow">Edit contact</p>
+          <h1>We couldn&apos;t load this contact.</h1>
+          <p className="section-copy">{contactsError}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!contact) {
     notFound();

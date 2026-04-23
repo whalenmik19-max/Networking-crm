@@ -25,7 +25,7 @@ import { isProPlan } from "@/lib/plans";
 
 export default function DashboardPage() {
   const { currentUser, isGuestMode } = useAuth();
-  const { contacts, guestContactsRemaining } = useContacts();
+  const { contacts, guestContactsRemaining, isContactsLoading, contactsError } = useContacts();
   const isPro = isProPlan(currentUser?.plan);
   const isFree = Boolean(currentUser) && !isPro;
   const overdueFollowUps = getOverdueFollowUps(contacts);
@@ -87,6 +87,23 @@ export default function DashboardPage() {
         </section>
       ) : null}
 
+      {contactsError ? (
+        <section className="content-panel">
+          <p className="auth-error">{contactsError}</p>
+        </section>
+      ) : null}
+
+      {isContactsLoading ? (
+        <section className="content-panel">
+          <p className="eyebrow">Dashboard</p>
+          <h2>Loading your workspace...</h2>
+          <p className="section-copy">
+            We&apos;re pulling in your private contacts and follow-ups now.
+          </p>
+        </section>
+      ) : null}
+
+      {!isContactsLoading ? (
       <section className="content-panel priority-panel">
         {isPro ? (
           <>
@@ -126,13 +143,17 @@ export default function DashboardPage() {
           </>
         )}
       </section>
+      ) : null}
 
+      {!isContactsLoading ? (
       <section className="stats-grid">
         <SectionCard title="Total contacts" value={String(contacts.length)} />
         <SectionCard title="Overdue" value={String(overdueFollowUps.length)} />
         <SectionCard title="Due this week" value={String(dueThisWeek.length)} />
       </section>
+      ) : null}
 
+      {!isContactsLoading ? (
       <section className="dashboard-grid">
         <article className="content-panel dashboard-panel">
           <div className="panel-header">
@@ -303,7 +324,9 @@ export default function DashboardPage() {
           )}
         </article>
       </section>
+      ) : null}
 
+      {!isContactsLoading ? (
       <section className="content-panel dashboard-panel">
         <div className="panel-header">
           <div>
@@ -432,6 +455,7 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+      ) : null}
     </div>
   );
 }

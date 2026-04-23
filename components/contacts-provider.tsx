@@ -1,35 +1,32 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { sampleContactIds, sampleContacts } from "@/lib/sample-contacts";
-import type {
-  Contact,
-  NewContact,
-  NewInteraction,
-  RelationshipType,
-} from "@/lib/types";
+import {
+  addContact as addSupabaseContact,
+  deleteContact as deleteSupabaseContact,
+  getContacts as getSupabaseContacts,
+  updateContact as updateSupabaseContact,
+} from "@/lib/supabase/contacts";
+import type { Contact, NewContact, NewInteraction, RelationshipType } from "@/lib/types";
 
 type ContactsContextValue = {
   contacts: Contact[];
   isGuestMode: boolean;
   canAddContact: boolean;
   guestContactsRemaining: number;
-  addContact: (contact: NewContact) => Contact | undefined;
-  updateContact: (contactId: string, updates: NewContact) => Contact | undefined;
-  deleteContact: (contactId: string) => void;
-  addInteraction: (contactId: string, interaction: NewInteraction) => Contact | undefined;
-  updateReminder: (contactId: string, reminderAt: string) => void;
+  isContactsLoading: boolean;
+  contactsError: string;
+  addContact: (contact: NewContact) => Promise<Contact | undefined>;
+  updateContact: (contactId: string, updates: NewContact) => Promise<Contact | undefined>;
+  deleteContact: (contactId: string) => Promise<void>;
+  addInteraction: (contactId: string, interaction: NewInteraction) => Promise<Contact | undefined>;
+  updateReminder: (contactId: string, reminderAt: string) => Promise<void>;
   clearCurrentUserContacts: () => void;
 };
 
 const ContactsContext = createContext<ContactsContextValue | undefined>(undefined);
-const storageKey = "networking-crm-contacts-by-user";
 const guestStorageKey = "networking-crm-guest-contacts";
 const guestContactLimit = 3;
 
@@ -55,11 +52,13 @@ function normalizeContact(contact: Partial<Contact>): Contact {
 
 export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const { currentUser, isGuestMode, isLoading } = useAuth();
-  const [contactsByUser, setContactsByUser] = useState<Record<string, Contact[]>>({});
+  const [signedInContacts, setSignedInContacts] = useState<Contact[]>([]);
   const [guestContacts, setGuestContacts] = useState<Contact[]>(sampleContacts);
-  const [hasLoadedContacts, setHasLoadedContacts] = useState(false);
+  const [hasLoadedGuestContacts, setHasLoadedGuestContacts] = useState(false);
+  const [isContactsLoading, setIsContactsLoading] = useState(false);
+  const [contactsError, setContactsError] = useState("");
 
-  const contacts = currentUser ? contactsByUser[currentUser.id] ?? [] : guestContacts;
+  const contacts = currentUser ? signedInContacts : guestContacts;
   const guestCreatedContactsCount = guestContacts.filter(
     (contact) => !sampleContactIds.has(contact.id),
   ).length;
@@ -67,68 +66,70 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const canAddContact = !isGuestMode || guestContactsRemaining > 0;
 
   useEffect(() => {
-    const storedContacts = window.localStorage.getItem(storageKey);
     const storedGuestContacts = window.localStorage.getItem(guestStorageKey);
-
-    if (storedContacts) {
-      const parsedContacts = JSON.parse(storedContacts) as Record<string, Partial<Contact>[]>;
-      const normalizedContacts = Object.fromEntries(
-        Object.entries(parsedContacts).map(([userId, userContacts]) => [
-          userId,
-          userContacts.map(normalizeContact),
-        ]),
-      );
-
-      setContactsByUser(normalizedContacts);
-    }
 
     if (storedGuestContacts) {
       setGuestContacts((JSON.parse(storedGuestContacts) as Partial<Contact>[]).map(normalizeContact));
     }
 
-    setHasLoadedContacts(true);
+    setHasLoadedGuestContacts(true);
   }, []);
 
   useEffect(() => {
-    if (!hasLoadedContacts || isLoading) {
-      return;
-    }
-
-    window.localStorage.setItem(storageKey, JSON.stringify(contactsByUser));
-  }, [contactsByUser, hasLoadedContacts, isLoading]);
-
-  useEffect(() => {
-    if (!hasLoadedContacts) {
+    if (!hasLoadedGuestContacts) {
       return;
     }
 
     window.localStorage.setItem(guestStorageKey, JSON.stringify(guestContacts));
-  }, [guestContacts, hasLoadedContacts]);
+  }, [guestContacts, hasLoadedGuestContacts]);
 
-  function updateCurrentUserContacts(updater: (contacts: Contact[]) => Contact[]) {
-    if (!currentUser) {
-      return;
+  useEffect(() => {
+    async function loadSignedInContacts() {
+      if (!currentUser) {
+        setSignedInContacts([]);
+        setContactsError("");
+        setIsContactsLoading(false);
+        return;
+      }
+
+      setIsContactsLoading(true);
+      setContactsError("");
+
+      try {
+        const nextContacts = await getSupabaseContacts();
+        setSignedInContacts(nextContacts.map(normalizeContact));
+      } catch (error) {
+        setContactsError(
+          error instanceof Error ? error.message : "We couldn't load your contacts.",
+        );
+        setSignedInContacts([]);
+      } finally {
+        setIsContactsLoading(false);
+      }
     }
 
-    setContactsByUser((current) => ({
-      ...current,
-      [currentUser.id]: updater(current[currentUser.id] ?? []),
-    }));
-  }
+    if (!isLoading) {
+      void loadSignedInContacts();
+    }
+  }, [currentUser, isLoading]);
 
   function updateGuestContacts(updater: (contacts: Contact[]) => Contact[]) {
     setGuestContacts((current) => updater(current));
   }
 
-  return (
-    <ContactsContext.Provider
-      value={{
-        contacts,
-        isGuestMode,
-        canAddContact,
-        guestContactsRemaining,
-        addContact: (contact) => {
-          if (isGuestMode && guestContactsRemaining <= 0) {
+  const value = useMemo<ContactsContextValue>(
+    () => ({
+      contacts,
+      isGuestMode,
+      canAddContact,
+      guestContactsRemaining,
+      isContactsLoading,
+      contactsError,
+      addContact: async (contact) => {
+        setContactsError("");
+
+        if (isGuestMode) {
+          if (guestContactsRemaining <= 0) {
             return undefined;
           }
 
@@ -137,109 +138,148 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
             ...contact,
           };
 
-          if (isGuestMode) {
-            updateGuestContacts((current) => [newContact, ...current]);
-          } else {
-            updateCurrentUserContacts((current) => [newContact, ...current]);
-          }
-
+          updateGuestContacts((current) => [newContact, ...current]);
           return newContact;
-        },
-        updateContact: (contactId, updates) => {
+        }
+
+        try {
+          const newContact = await addSupabaseContact(contact);
+          setSignedInContacts((current) => [normalizeContact(newContact), ...current]);
+          return normalizeContact(newContact);
+        } catch (error) {
+          setContactsError(
+            error instanceof Error ? error.message : "We couldn't save this contact.",
+          );
+          return undefined;
+        }
+      },
+      updateContact: async (contactId, updates) => {
+        setContactsError("");
+
+        if (isGuestMode) {
           let updatedContact: Contact | undefined;
 
-          const updater = (current: Contact[]) =>
+          updateGuestContacts((current) =>
             current.map((contact) => {
               if (contact.id !== contactId) {
                 return contact;
               }
 
-              updatedContact = {
-                ...contact,
-                ...updates,
-              };
-
+              updatedContact = { ...contact, ...updates };
               return updatedContact;
-            });
-
-          if (isGuestMode) {
-            updateGuestContacts(updater);
-          } else {
-            updateCurrentUserContacts(updater);
-          }
+            }),
+          );
 
           return updatedContact;
-        },
-        deleteContact: (contactId) => {
-          const updater = (current: Contact[]) =>
-            current.filter((contact) => contact.id !== contactId);
+        }
 
-          if (isGuestMode) {
-            updateGuestContacts(updater);
-          } else {
-            updateCurrentUserContacts(updater);
-          }
-        },
-        addInteraction: (contactId, interaction) => {
-          const newInteraction = {
-            id: crypto.randomUUID(),
-            ...interaction,
-          };
+        try {
+          const updatedContact = await updateSupabaseContact(contactId, updates);
+          const normalizedContact = normalizeContact(updatedContact);
+          setSignedInContacts((current) =>
+            current.map((contact) => (contact.id === contactId ? normalizedContact : contact)),
+          );
+          return normalizedContact;
+        } catch (error) {
+          setContactsError(
+            error instanceof Error ? error.message : "We couldn't update this contact.",
+          );
+          return undefined;
+        }
+      },
+      deleteContact: async (contactId) => {
+        setContactsError("");
 
-          let updatedContact: Contact | undefined;
+        if (isGuestMode) {
+          updateGuestContacts((current) => current.filter((contact) => contact.id !== contactId));
+          return;
+        }
 
-          const updater = (current: Contact[]) =>
-            current.map((contact) => {
-              if (contact.id !== contactId) {
-                return contact;
-              }
+        try {
+          await deleteSupabaseContact(contactId);
+          setSignedInContacts((current) => current.filter((contact) => contact.id !== contactId));
+        } catch (error) {
+          setContactsError(
+            error instanceof Error ? error.message : "We couldn't delete this contact.",
+          );
+        }
+      },
+      addInteraction: async (contactId, interaction) => {
+        const newInteraction = {
+          id: crypto.randomUUID(),
+          ...interaction,
+        };
 
-              updatedContact = {
-                ...contact,
-                interactions: [newInteraction, ...contact.interactions].sort((first, second) =>
-                  second.date.localeCompare(first.date),
-                ),
-              };
+        let updatedContact: Contact | undefined;
+        const updateList = (current: Contact[]) =>
+          current.map((contact) => {
+            if (contact.id !== contactId) {
+              return contact;
+            }
 
-              return updatedContact;
-            });
+            updatedContact = {
+              ...contact,
+              interactions: [newInteraction, ...contact.interactions].sort((first, second) =>
+                second.date.localeCompare(first.date),
+              ),
+            };
 
-          if (isGuestMode) {
-            updateGuestContacts(updater);
-          } else {
-            updateCurrentUserContacts(updater);
-          }
+            return updatedContact;
+          });
 
-          return updatedContact;
-        },
-        updateReminder: (contactId, reminderAt) => {
-          const updater = (current: Contact[]) =>
+        if (isGuestMode) {
+          updateGuestContacts(updateList);
+        } else {
+          setSignedInContacts((current) => updateList(current));
+        }
+
+        return updatedContact;
+      },
+      updateReminder: async (contactId, reminderAt) => {
+        setContactsError("");
+
+        if (isGuestMode) {
+          updateGuestContacts((current) =>
             current.map((contact) =>
               contact.id === contactId ? { ...contact, reminderAt } : contact,
-            );
+            ),
+          );
+          return;
+        }
 
-          if (isGuestMode) {
-            updateGuestContacts(updater);
-          } else {
-            updateCurrentUserContacts(updater);
-          }
-        },
-        clearCurrentUserContacts: () => {
-          if (!currentUser) {
-            return;
-          }
+        setSignedInContacts((current) =>
+          current.map((contact) =>
+            contact.id === contactId ? { ...contact, reminderAt } : contact,
+          ),
+        );
 
-          setContactsByUser((current) => {
-            const nextState = { ...current };
-            delete nextState[currentUser.id];
-            return nextState;
-          });
-        },
-      }}
-    >
-      {children}
-    </ContactsContext.Provider>
+        try {
+          const updatedContact = await updateSupabaseContact(contactId, { reminderAt });
+          const normalizedContact = normalizeContact(updatedContact);
+          setSignedInContacts((current) =>
+            current.map((contact) => (contact.id === contactId ? normalizedContact : contact)),
+          );
+        } catch (error) {
+          setContactsError(
+            error instanceof Error ? error.message : "We couldn't save this reminder.",
+          );
+        }
+      },
+      clearCurrentUserContacts: () => {
+        setSignedInContacts([]);
+      },
+    }),
+    [
+      canAddContact,
+      contacts,
+      contactsError,
+      guestContactsRemaining,
+      isContactsLoading,
+      isGuestMode,
+    ],
   );
+
+  return <ContactsContext.Provider value={value}>{children}</ContactsContext.Provider>;
 }
 
 export function useContacts() {
