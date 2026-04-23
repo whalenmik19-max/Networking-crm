@@ -30,7 +30,8 @@ export default function FeedbackPage() {
     setIsSending(false);
 
     if (error) {
-      setStatus("We couldn't send your feedback right now.");
+      console.error("Feedback submission failed:", error);
+      setStatus(error.message || "We couldn't send your feedback right now.");
       return;
     }
 
