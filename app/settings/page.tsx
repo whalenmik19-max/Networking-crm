@@ -4,22 +4,16 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  getLatestDeletionRequest,
+  submitDeletionRequest,
+} from "@/lib/supabase/deletion-requests";
 import { getUserSettings, updateUserSettings } from "@/lib/supabase/settings";
 import {
   type AccountDeletionRequest,
   defaultUserSettings,
   type UserSettings,
 } from "@/lib/settings";
-const deletionRequestsTable = "account_deletion_requests";
-
-type AccountDeletionRequestRow = {
-  user_id: string;
-  name: string;
-  email: string;
-  requested_at: string;
-  status: "pending";
-};
 
 function normalizeSettings(
   currentUser: { email: string; plan: UserSettings["subscriptionPlan"] } | null,
@@ -51,22 +45,6 @@ function normalizeSettings(
   };
 }
 
-function toDeletionRequest(
-  row: AccountDeletionRequestRow | null,
-): AccountDeletionRequest | null {
-  if (!row) {
-    return null;
-  }
-
-  return {
-    userId: row.user_id,
-    name: row.name,
-    email: row.email,
-    requestedAt: row.requested_at,
-    status: row.status,
-  };
-}
-
 export default function SettingsPage() {
   const router = useRouter();
   const { currentUser, isLoading, setPlan, updateAccount } = useAuth();
@@ -75,6 +53,7 @@ export default function SettingsPage() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingPreferences, setIsSavingPreferences] = useState(false);
   const [isSubmittingDeletionRequest, setIsSubmittingDeletionRequest] = useState(false);
+  const [isLoadingDeletionRequest, setIsLoadingDeletionRequest] = useState(false);
   const [deletionRequest, setDeletionRequest] = useState<AccountDeletionRequest | null>(null);
   const [profileForm, setProfileForm] = useState({
     name: "",
@@ -113,21 +92,20 @@ export default function SettingsPage() {
         );
       }
 
-      const supabase = getSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from(deletionRequestsTable)
-        .select("user_id, name, email, requested_at, status")
-        .eq("user_id", currentUser.id)
-        .order("requested_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      setIsLoadingDeletionRequest(true);
 
-      if (error) {
-        setError("We couldn't load your deletion request status.");
-        return;
+      try {
+        const latestDeletionRequest = await getLatestDeletionRequest();
+        setDeletionRequest(latestDeletionRequest);
+      } catch (deletionRequestError) {
+        setError(
+          deletionRequestError instanceof Error
+            ? deletionRequestError.message
+            : "We couldn't load your deletion request.",
+        );
+      } finally {
+        setIsLoadingDeletionRequest(false);
       }
-
-      setDeletionRequest(toDeletionRequest((data as AccountDeletionRequestRow | null) ?? null));
     }
 
     if (!currentUser) {
@@ -139,6 +117,7 @@ export default function SettingsPage() {
   }, [currentUser]);
 
   const canShowPage = useMemo(() => !isLoading && currentUser, [currentUser, isLoading]);
+  const hasPendingDeletionRequest = deletionRequest?.status === "pending";
 
   function updateProfileField(name: keyof typeof profileForm, value: string) {
     setProfileForm((current) => ({
@@ -242,32 +221,22 @@ export default function SettingsPage() {
     setError("");
     setIsSubmittingDeletionRequest(true);
 
-    const nextRequest: AccountDeletionRequest = {
-      userId: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      requestedAt: new Date().toISOString(),
-      status: "pending",
-    };
-    const supabase = getSupabaseBrowserClient();
-    const { error: insertError } = await supabase.from(deletionRequestsTable).insert({
-      user_id: nextRequest.userId,
-      name: nextRequest.name,
-      email: nextRequest.email,
-      requested_at: nextRequest.requestedAt,
-      status: nextRequest.status,
-    });
-
-    if (insertError) {
+    try {
+      const nextRequest = await submitDeletionRequest();
+      setDeletionRequest(nextRequest);
+    } catch (requestError) {
       setIsSubmittingDeletionRequest(false);
-      setError("We couldn't send your deletion request right now.");
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "We couldn't submit your deletion request right now.",
+      );
       return;
     }
 
-    setDeletionRequest(nextRequest);
     setIsSubmittingDeletionRequest(false);
     setStatus(
-      "Your deletion request has been recorded for admin review. Your account and saved data are queued for deletion within 48 hours.",
+      "Your deletion request was submitted. It is visible only to you in Settings while it is pending admin review.",
     );
   }
 
@@ -481,21 +450,46 @@ export default function SettingsPage() {
           saved data will be removed within 48 hours.
         </p>
 
-        {deletionRequest ? (
+        {isLoadingDeletionRequest ? (
           <div className="deletion-request-card">
-            <p className="prep-label">Deletion request pending</p>
+            <p className="prep-label">Loading deletion request</p>
+            <p className="helper-text">Checking whether you already have a request pending.</p>
+          </div>
+        ) : deletionRequest ? (
+          <div className="deletion-request-card">
+            <p className="prep-label">
+              {hasPendingDeletionRequest ? "Deletion request pending" : "Latest deletion request"}
+            </p>
             <p className="helper-text">
               Requested on{" "}
               {new Date(deletionRequest.requestedAt).toLocaleDateString(undefined, {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
-              })}{" "}
-              for <strong>{deletionRequest.email}</strong>.
+              })}
+              . This status is visible only to you while the request is under review.
             </p>
             <p className="helper-text">
-              A Keeply admin should complete deletion within 48 hours.
+              Status: <strong>{deletionRequest.status}</strong>
             </p>
+            {deletionRequest.reviewedAt ? (
+              <p className="helper-text">
+                Reviewed on{" "}
+                {new Date(deletionRequest.reviewedAt).toLocaleDateString(undefined, {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+                .
+              </p>
+            ) : null}
+            {deletionRequest.reviewNotes ? (
+              <p className="helper-text">{deletionRequest.reviewNotes}</p>
+            ) : (
+              <p className="helper-text">
+                A Keeply admin should review this request within 48 hours.
+              </p>
+            )}
           </div>
         ) : null}
 
@@ -503,10 +497,10 @@ export default function SettingsPage() {
           <button
             type="button"
             className="button danger-button"
-            disabled={isSubmittingDeletionRequest || Boolean(deletionRequest)}
+            disabled={isSubmittingDeletionRequest || hasPendingDeletionRequest}
             onClick={handleDeleteRequest}
           >
-            {deletionRequest ? "Deletion request submitted" : "Request account deletion"}
+            {hasPendingDeletionRequest ? "Deletion request submitted" : "Request account deletion"}
           </button>
         </div>
       </section>

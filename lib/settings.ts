@@ -15,11 +15,12 @@ export type UserSettings = {
 };
 
 export type AccountDeletionRequest = {
+  id: string;
   userId: string;
-  name: string;
-  email: string;
   requestedAt: string;
-  status: "pending";
+  status: string;
+  reviewedAt: string | null;
+  reviewNotes: string | null;
 };
 
 export const defaultUserSettings: UserSettings = {
