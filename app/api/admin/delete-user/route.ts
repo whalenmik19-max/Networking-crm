@@ -43,12 +43,86 @@ async function deleteRowsForUser(
   return null;
 }
 
-async function deleteContactsWithCascade(userId: string, completedSteps: DeletionStep[]) {
+async function deleteContactChildrenAndContacts(
+  userId: string,
+  completedSteps: DeletionStep[],
+) {
   const supabaseAdmin = getSupabaseAdminClient();
-  const { error } = await supabaseAdmin.from("contacts").delete().eq("user_id", userId);
+  const { data: contacts, error: contactLookupError } = await supabaseAdmin
+    .from("contacts")
+    .select("id")
+    .eq("user_id", userId);
 
-  if (error) {
-    console.error(error);
+  if (contactLookupError) {
+    console.error(contactLookupError);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to load contact rows for deletion.",
+        code: "partial_deletion_failure",
+        failedStep: "contacts",
+        completedSteps,
+      },
+      { status: 500 },
+    );
+  }
+
+  const contactIds = (contacts ?? []).map((contact) => contact.id);
+
+  if (contactIds.length > 0) {
+    const { error: interactionsError } = await supabaseAdmin
+      .from("interactions")
+      .delete()
+      .in("contact_id", contactIds);
+
+    if (interactionsError) {
+      console.error(interactionsError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to delete interaction rows.",
+          code: "partial_deletion_failure",
+          failedStep: "interactions",
+          completedSteps,
+        },
+        { status: 500 },
+      );
+    }
+
+    completedSteps.push("interactions");
+
+    const { error: remindersError } = await supabaseAdmin
+      .from("reminders")
+      .delete()
+      .in("contact_id", contactIds);
+
+    if (remindersError) {
+      console.error(remindersError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to delete reminder rows.",
+          code: "partial_deletion_failure",
+          failedStep: "reminders",
+          completedSteps,
+        },
+        { status: 500 },
+      );
+    }
+
+    completedSteps.push("reminders");
+  } else {
+    completedSteps.push("interactions");
+    completedSteps.push("reminders");
+  }
+
+  const { error: contactsError } = await supabaseAdmin
+    .from("contacts")
+    .delete()
+    .eq("user_id", userId);
+
+  if (contactsError) {
+    console.error(contactsError);
     return NextResponse.json(
       {
         success: false,
@@ -62,8 +136,6 @@ async function deleteContactsWithCascade(userId: string, completedSteps: Deletio
   }
 
   completedSteps.push("contacts");
-  completedSteps.push("interactions");
-  completedSteps.push("reminders");
   return null;
 }
 
@@ -183,7 +255,7 @@ export async function POST(request: Request) {
   }
 
   const completedSteps: DeletionStep[] = [];
-  const contactDeleteFailure = await deleteContactsWithCascade(userId, completedSteps);
+  const contactDeleteFailure = await deleteContactChildrenAndContacts(userId, completedSteps);
 
   if (contactDeleteFailure) {
     return contactDeleteFailure;
