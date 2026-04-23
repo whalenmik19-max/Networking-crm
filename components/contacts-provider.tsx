@@ -110,7 +110,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
         const nextContacts = await getSupabaseContacts();
         const [interactionsByContact, reminders] = await Promise.all([
           Promise.all(
-            nextContacts.map(async (contact) => ({
+            nextContacts.map(async (contact: Contact) => ({
               contactId: contact.id,
               interactions: await getSupabaseInteractions(contact.id),
             })),
@@ -118,11 +118,14 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
           getSupabaseReminders(),
         ]);
 
-        const contactsWithDetails = nextContacts.map((contact) => {
+        const contactsWithDetails = nextContacts.map((contact: Contact) => {
           const matchingInteractions = interactionsByContact.find(
-            (entry) => entry.contactId === contact.id,
+            (entry: { contactId: string; interactions: Contact["interactions"] }) =>
+              entry.contactId === contact.id,
           );
-          const matchingReminder = reminders.find((reminder) => reminder.contactId === contact.id);
+          const matchingReminder = reminders.find(
+            (reminder: Reminder) => reminder.contactId === contact.id,
+          );
 
           return normalizeContact({
             ...contact,
