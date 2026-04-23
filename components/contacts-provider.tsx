@@ -9,6 +9,16 @@ import {
   getContacts as getSupabaseContacts,
   updateContact as updateSupabaseContact,
 } from "@/lib/supabase/contacts";
+import {
+  addInteraction as addSupabaseInteraction,
+  getInteractions as getSupabaseInteractions,
+} from "@/lib/supabase/interactions";
+import {
+  addReminder as addSupabaseReminder,
+  deleteReminder as deleteSupabaseReminder,
+  getReminders as getSupabaseReminders,
+  type Reminder,
+} from "@/lib/supabase/reminders";
 import type { Contact, NewContact, NewInteraction, RelationshipType } from "@/lib/types";
 
 type ContactsContextValue = {
@@ -57,6 +67,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const [hasLoadedGuestContacts, setHasLoadedGuestContacts] = useState(false);
   const [isContactsLoading, setIsContactsLoading] = useState(false);
   const [contactsError, setContactsError] = useState("");
+  const [signedInReminders, setSignedInReminders] = useState<Reminder[]>([]);
 
   const contacts = currentUser ? signedInContacts : guestContacts;
   const guestCreatedContactsCount = guestContacts.filter(
@@ -97,12 +108,37 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const nextContacts = await getSupabaseContacts();
-        setSignedInContacts(nextContacts.map(normalizeContact));
+        const [interactionsByContact, reminders] = await Promise.all([
+          Promise.all(
+            nextContacts.map(async (contact) => ({
+              contactId: contact.id,
+              interactions: await getSupabaseInteractions(contact.id),
+            })),
+          ),
+          getSupabaseReminders(),
+        ]);
+
+        const contactsWithDetails = nextContacts.map((contact) => {
+          const matchingInteractions = interactionsByContact.find(
+            (entry) => entry.contactId === contact.id,
+          );
+          const matchingReminder = reminders.find((reminder) => reminder.contactId === contact.id);
+
+          return normalizeContact({
+            ...contact,
+            interactions: matchingInteractions?.interactions ?? [],
+            reminderAt: matchingReminder?.remindAt ?? "",
+          });
+        });
+
+        setSignedInContacts(contactsWithDetails);
+        setSignedInReminders(reminders);
       } catch (error) {
         setContactsError(
           error instanceof Error ? error.message : "We couldn't load your contacts.",
         );
         setSignedInContacts([]);
+        setSignedInReminders([]);
       } finally {
         setIsContactsLoading(false);
       }
@@ -196,6 +232,17 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
         }
 
         try {
+          const matchingReminder = signedInReminders.find(
+            (reminder) => reminder.contactId === contactId,
+          );
+
+          if (matchingReminder) {
+            await deleteSupabaseReminder(matchingReminder.id);
+            setSignedInReminders((current) =>
+              current.filter((reminder) => reminder.id !== matchingReminder.id),
+            );
+          }
+
           await deleteSupabaseContact(contactId);
           setSignedInContacts((current) => current.filter((contact) => contact.id !== contactId));
         } catch (error) {
@@ -205,35 +252,61 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
         }
       },
       addInteraction: async (contactId, interaction) => {
-        const newInteraction = {
-          id: crypto.randomUUID(),
-          ...interaction,
-        };
-
-        let updatedContact: Contact | undefined;
-        const updateList = (current: Contact[]) =>
-          current.map((contact) => {
-            if (contact.id !== contactId) {
-              return contact;
-            }
-
-            updatedContact = {
-              ...contact,
-              interactions: [newInteraction, ...contact.interactions].sort((first, second) =>
-                second.date.localeCompare(first.date),
-              ),
-            };
-
-            return updatedContact;
-          });
-
         if (isGuestMode) {
+          const newInteraction = {
+            id: crypto.randomUUID(),
+            ...interaction,
+          };
+
+          let updatedContact: Contact | undefined;
+          const updateList = (current: Contact[]) =>
+            current.map((contact) => {
+              if (contact.id !== contactId) {
+                return contact;
+              }
+
+              updatedContact = {
+                ...contact,
+                interactions: [newInteraction, ...contact.interactions].sort((first, second) =>
+                  second.date.localeCompare(first.date),
+                ),
+              };
+
+              return updatedContact;
+            });
+
           updateGuestContacts(updateList);
-        } else {
-          setSignedInContacts((current) => updateList(current));
+          return updatedContact;
         }
 
-        return updatedContact;
+        try {
+          const savedInteraction = await addSupabaseInteraction(contactId, interaction);
+          let updatedContact: Contact | undefined;
+
+          setSignedInContacts((current) =>
+            current.map((contact) => {
+              if (contact.id !== contactId) {
+                return contact;
+              }
+
+              updatedContact = {
+                ...contact,
+                interactions: [savedInteraction, ...contact.interactions].sort((first, second) =>
+                  second.date.localeCompare(first.date),
+                ),
+              };
+
+              return updatedContact;
+            }),
+          );
+
+          return updatedContact;
+        } catch (error) {
+          setContactsError(
+            error instanceof Error ? error.message : "We couldn't save this interaction.",
+          );
+          return undefined;
+        }
       },
       updateReminder: async (contactId, reminderAt) => {
         setContactsError("");
@@ -247,17 +320,35 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        setSignedInContacts((current) =>
-          current.map((contact) =>
-            contact.id === contactId ? { ...contact, reminderAt } : contact,
-          ),
-        );
-
         try {
-          const updatedContact = await updateSupabaseContact(contactId, { reminderAt });
-          const normalizedContact = normalizeContact(updatedContact);
+          const existingReminder = signedInReminders.find(
+            (reminder) => reminder.contactId === contactId,
+          );
+
+          if (existingReminder) {
+            await deleteSupabaseReminder(existingReminder.id);
+          }
+
+          let nextReminder: Reminder | undefined;
+
+          if (reminderAt) {
+            nextReminder = await addSupabaseReminder(contactId, reminderAt);
+          }
+
+          setSignedInReminders((current) => {
+            const withoutCurrent = current.filter((reminder) => reminder.contactId !== contactId);
+            return nextReminder ? [...withoutCurrent, nextReminder] : withoutCurrent;
+          });
+
           setSignedInContacts((current) =>
-            current.map((contact) => (contact.id === contactId ? normalizedContact : contact)),
+            current.map((contact) =>
+              contact.id === contactId
+                ? normalizeContact({
+                    ...contact,
+                    reminderAt: nextReminder?.remindAt ?? "",
+                  })
+                : contact,
+            ),
           );
         } catch (error) {
           setContactsError(
@@ -267,12 +358,14 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       },
       clearCurrentUserContacts: () => {
         setSignedInContacts([]);
+        setSignedInReminders([]);
       },
     }),
     [
       canAddContact,
       contacts,
       contactsError,
+      signedInReminders,
       guestContactsRemaining,
       isContactsLoading,
       isGuestMode,

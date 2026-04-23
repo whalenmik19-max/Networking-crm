@@ -51,6 +51,7 @@ export async function getReminders() {
     .order("remind_at", { ascending: true });
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't load your reminders.");
   }
 
@@ -71,6 +72,7 @@ export async function addReminder(contactId: string, remindAt: string) {
     .single();
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't save this reminder.");
   }
 
@@ -87,6 +89,7 @@ export async function deleteReminder(reminderId: string) {
     .eq("user_id", userId);
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't delete this reminder.");
   }
 }

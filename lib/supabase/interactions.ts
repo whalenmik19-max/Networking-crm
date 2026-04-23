@@ -50,6 +50,7 @@ export async function getInteractions(contactId: string) {
     .order("date", { ascending: false });
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't load interactions for this contact.");
   }
 
@@ -72,6 +73,7 @@ export async function addInteraction(contactId: string, interaction: NewInteract
     .single();
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't save this interaction.");
   }
 
@@ -88,6 +90,7 @@ export async function deleteInteraction(interactionId: string) {
     .eq("user_id", userId);
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't delete this interaction.");
   }
 }
