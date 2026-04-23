@@ -8,6 +8,8 @@ const deletionRequestsTable = "account_deletion_requests";
 type AccountDeletionRequestRow = {
   id: string;
   user_id: string;
+  name?: string | null;
+  email?: string | null;
   status: string | null;
   requested_at: string | null;
   reviewed_at: string | null;
@@ -55,7 +57,7 @@ export async function getLatestDeletionRequest() {
   const userId = await requireUserId();
   const { data, error } = await supabase
     .from(deletionRequestsTable)
-    .select("id, user_id, status, requested_at, reviewed_at, review_notes")
+    .select("id, user_id, name, email, status, requested_at, reviewed_at, review_notes")
     .eq("user_id", userId)
     .order("requested_at", { ascending: false })
     .limit(1)
@@ -69,7 +71,7 @@ export async function getLatestDeletionRequest() {
   return mapDeletionRequestRow((data as AccountDeletionRequestRow | null) ?? null);
 }
 
-export async function submitDeletionRequest() {
+export async function submitDeletionRequest(input: { name: string; email: string }) {
   const supabase = getSupabaseBrowserClient();
   const userId = await requireUserId();
   const requestedAt = new Date().toISOString();
@@ -77,17 +79,19 @@ export async function submitDeletionRequest() {
     .from(deletionRequestsTable)
     .insert({
       user_id: userId,
+      name: input.name.trim(),
+      email: input.email.trim().toLowerCase(),
       status: "pending",
       requested_at: requestedAt,
       reviewed_at: null,
       review_notes: null,
     })
-    .select("id, user_id, status, requested_at, reviewed_at, review_notes")
+    .select("id, user_id, name, email, status, requested_at, reviewed_at, review_notes")
     .single();
 
   if (error) {
     console.error(error);
-    throw new Error("We couldn't submit your deletion request.");
+    throw new Error(error.message || "We couldn't submit your deletion request.");
   }
 
   return mapDeletionRequestRow(data as AccountDeletionRequestRow);

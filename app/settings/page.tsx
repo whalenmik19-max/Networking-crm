@@ -222,7 +222,10 @@ export default function SettingsPage() {
     setIsSubmittingDeletionRequest(true);
 
     try {
-      const nextRequest = await submitDeletionRequest();
+      const nextRequest = await submitDeletionRequest({
+        name: currentUser.name,
+        email: currentUser.email,
+      });
       setDeletionRequest(nextRequest);
     } catch (requestError) {
       setIsSubmittingDeletionRequest(false);
