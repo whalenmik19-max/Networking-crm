@@ -17,8 +17,6 @@ type ContactRow = {
   relationship_type?: string | null;
   notes?: string | null;
   next_follow_up_date?: string | null;
-  reminder_at?: string | null;
-  tags?: string[] | null;
 };
 
 function mapContactRow(row: ContactRow): Contact {
@@ -35,8 +33,8 @@ function mapContactRow(row: ContactRow): Contact {
     relationshipType: row.relationship_type ?? "",
     notes: row.notes ?? "",
     nextFollowUpDate: row.next_follow_up_date ?? "",
-    reminderAt: row.reminder_at ?? "",
-    tags: Array.isArray(row.tags) ? row.tags : [],
+    reminderAt: "",
+    tags: [],
     interactions: [],
   };
 }
@@ -55,8 +53,6 @@ function toContactRow(contact: NewContact, userId: string) {
     relationship_type: contact.relationshipType,
     notes: contact.notes,
     next_follow_up_date: contact.nextFollowUpDate || null,
-    reminder_at: contact.reminderAt || null,
-    tags: contact.tags,
   };
 }
 
@@ -88,10 +84,11 @@ export async function getContacts() {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't load your contacts.");
   }
 
-  return (data ?? []).map((row) => mapContactRow(row as ContactRow));
+  return (data ?? []).map((row: unknown) => mapContactRow(row as ContactRow));
 }
 
 export async function addContact(contact: NewContact) {
@@ -104,6 +101,7 @@ export async function addContact(contact: NewContact) {
     .single();
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't save this contact.");
   }
 
@@ -131,8 +129,6 @@ export async function updateContact(contactId: string, updates: Partial<NewConta
       ...(updates.nextFollowUpDate !== undefined
         ? { next_follow_up_date: updates.nextFollowUpDate || null }
         : {}),
-      ...(updates.reminderAt !== undefined ? { reminder_at: updates.reminderAt || null } : {}),
-      ...(updates.tags !== undefined ? { tags: updates.tags } : {}),
     })
     .eq("id", contactId)
     .eq("user_id", userId)
@@ -140,6 +136,7 @@ export async function updateContact(contactId: string, updates: Partial<NewConta
     .single();
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't update this contact.");
   }
 
@@ -156,6 +153,7 @@ export async function deleteContact(contactId: string) {
     .eq("user_id", userId);
 
   if (error) {
+    console.error(error);
     throw new Error("We couldn't delete this contact.");
   }
 }

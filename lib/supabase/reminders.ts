@@ -54,7 +54,7 @@ export async function getReminders() {
     throw new Error("We couldn't load your reminders.");
   }
 
-  return (data ?? []).map((row) => mapReminderRow(row as ReminderRow));
+  return (data ?? []).map((row: unknown) => mapReminderRow(row as ReminderRow));
 }
 
 export async function addReminder(contactId: string, remindAt: string) {

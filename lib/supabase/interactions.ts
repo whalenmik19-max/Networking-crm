@@ -53,7 +53,7 @@ export async function getInteractions(contactId: string) {
     throw new Error("We couldn't load interactions for this contact.");
   }
 
-  return (data ?? []).map((row) => mapInteractionRow(row as InteractionRow));
+  return (data ?? []).map((row: unknown) => mapInteractionRow(row as InteractionRow));
 }
 
 export async function addInteraction(contactId: string, interaction: NewInteraction) {
