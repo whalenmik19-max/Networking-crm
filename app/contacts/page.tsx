@@ -156,7 +156,7 @@ export default function ContactsPage() {
                     <small>{formatProfessionalSummary(contact)}</small>
                   </span>
                 </span>
-                <span>{contact.company || "Optional"}</span>
+                <span>{contact.company || "Not added yet"}</span>
                 <span>{contact.dateMet ? formatDate(contact.dateMet) : "Not added yet"}</span>
                 <span>{contact.relationshipType || "Not added yet"}</span>
                 <span>{formatOptionalDate(contact.nextFollowUpDate)}</span>

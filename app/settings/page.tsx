@@ -346,8 +346,8 @@ export default function SettingsPage() {
                   }))
                 }
               >
-                <option value="free">free</option>
-                <option value="pro">pro</option>
+                <option value="free">Free</option>
+                <option value="pro">Pro</option>
               </select>
               <p className="helper-text">
                 This updates your Keeply plan in Supabase. For now, pricing is simulated.

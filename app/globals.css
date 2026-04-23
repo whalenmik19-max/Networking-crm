@@ -328,6 +328,18 @@ h3 {
   margin-top: 1rem;
 }
 
+.quick-log-panel {
+  align-content: start;
+}
+
+.quick-log-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quick-log-empty-action {
+  justify-self: start;
+}
+
 .feedback-header {
   padding-bottom: 1.2rem;
 }
@@ -522,6 +534,18 @@ h3 {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.inline-follow-up-form {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.inline-follow-up-actions {
+  justify-content: flex-start;
 }
 
 .prep-panel {
@@ -1439,5 +1463,9 @@ small {
   .contacts-table-row {
     grid-template-columns: 1fr;
     padding: 1rem 0;
+  }
+
+  .quick-log-grid {
+    grid-template-columns: 1fr;
   }
 }

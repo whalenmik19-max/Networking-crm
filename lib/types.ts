@@ -8,7 +8,7 @@ export const interactionTypes = [
   "other",
 ] as const;
 
-export type InteractionType = (typeof interactionTypes)[number];
+export type InteractionType = string;
 export type RelationshipType = string;
 
 export type Interaction = {

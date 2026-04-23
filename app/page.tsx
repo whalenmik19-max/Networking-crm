@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DashboardInteractionForm } from "@/components/dashboard-interaction-form";
 import { ProLockCard } from "@/components/pro-lock-card";
 import { UpgradeButton } from "@/components/upgrade-button";
 import { EmptyState } from "@/components/empty-state";
@@ -155,6 +156,8 @@ export default function DashboardPage() {
 
       {!isContactsLoading ? (
       <section className="dashboard-grid">
+        <DashboardInteractionForm />
+
         <article className="content-panel dashboard-panel">
           <div className="panel-header">
             <div>

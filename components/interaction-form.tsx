@@ -14,7 +14,7 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [formState, setFormState] = useState({
     date: "",
-    type: "coffee chat",
+    type: "",
     notes: "",
   });
 
@@ -25,7 +25,7 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
 
     const updatedContact = await addInteraction(contactId, {
       date: formState.date,
-      type: formState.type as (typeof interactionTypes)[number],
+      type: formState.type.trim(),
       notes: formState.notes.trim(),
     });
 
@@ -37,7 +37,7 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
 
     setFormState({
       date: "",
-      type: "coffee chat",
+      type: "",
       notes: "",
     });
     setIsSaving(false);
@@ -67,20 +67,22 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
         </div>
 
         <div className="field">
-          <label htmlFor="interaction-type">Type</label>
-          <select
+          <label htmlFor="interaction-type">Type of meeting</label>
+          <input
             id="interaction-type"
+            list="interaction-types"
+            required
             value={formState.type}
             onChange={(event) =>
               setFormState((current) => ({ ...current, type: event.target.value }))
             }
-          >
+            placeholder="Coffee chat, recruiter call, intro meeting..."
+          />
+          <datalist id="interaction-types">
             {interactionTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
+              <option key={type} value={type} />
             ))}
-          </select>
+          </datalist>
         </div>
 
         <div className="field field-full">

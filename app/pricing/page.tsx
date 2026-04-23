@@ -142,12 +142,10 @@ export default function PricingPage() {
       </section>
 
       <section className="content-panel">
-        <p className="eyebrow">Later</p>
-        <h2>Real billing can plug in here later</h2>
+        <p className="eyebrow">Current setup</p>
+        <h2>Pro is currently a demo version</h2>
         <p className="section-copy">
-          This page still simulates upgrades by updating the user plan in Supabase. When
-          you add Stripe later, this is the right place to swap the Pro button into a
-          checkout flow.
+          Keeply currently simulates plan changes so people can try the Pro experience without real billing yet.
         </p>
       </section>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { ProLockCard } from "@/components/pro-lock-card";
@@ -21,8 +22,17 @@ export default function ContactDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { currentUser, isGuestMode } = useAuth();
-  const { contacts, deleteContact, isContactsLoading, contactsError } = useContacts();
+  const { contacts, deleteContact, updateContact, isContactsLoading, contactsError } =
+    useContacts();
   const contact = contacts.find((item) => item.id === params.id);
+  const [followUpDate, setFollowUpDate] = useState("");
+  const [followUpStatus, setFollowUpStatus] = useState("");
+  const [followUpError, setFollowUpError] = useState("");
+  const [isSavingFollowUp, setIsSavingFollowUp] = useState(false);
+
+  useEffect(() => {
+    setFollowUpDate(contact?.nextFollowUpDate ?? "");
+  }, [contact?.nextFollowUpDate]);
 
   if (isContactsLoading) {
     return (
@@ -68,6 +78,27 @@ export default function ContactDetailPage() {
 
     await deleteContact(activeContact.id);
     router.push("/contacts");
+  }
+
+  async function handleFollowUpSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFollowUpStatus("");
+    setFollowUpError("");
+    setIsSavingFollowUp(true);
+
+    const updatedContact = await updateContact(activeContact.id, {
+      ...activeContact,
+      nextFollowUpDate: followUpDate,
+    });
+
+    setIsSavingFollowUp(false);
+
+    if (!updatedContact) {
+      setFollowUpError("We couldn't save the next follow-up date.");
+      return;
+    }
+
+    setFollowUpStatus(followUpDate ? "Next follow-up saved." : "Next follow-up cleared.");
   }
 
   return (
@@ -126,6 +157,37 @@ export default function ContactDetailPage() {
               <dd>{formatOptionalDate(activeContact.nextFollowUpDate)}</dd>
             </div>
           </dl>
+
+          <form className="inline-follow-up-form" onSubmit={handleFollowUpSubmit}>
+            <div className="field">
+              <label htmlFor="detail-follow-up-date">Schedule next follow-up</label>
+              <input
+                id="detail-follow-up-date"
+                type="date"
+                value={followUpDate}
+                onChange={(event) => setFollowUpDate(event.target.value)}
+              />
+            </div>
+            {followUpError ? <p className="auth-error">{followUpError}</p> : null}
+            {followUpStatus ? <p className="helper-text">{followUpStatus}</p> : null}
+            <div className="form-actions inline-follow-up-actions">
+              <button
+                type="submit"
+                className="button button-primary"
+                disabled={isSavingFollowUp}
+              >
+                {isSavingFollowUp ? "Saving..." : "Save next follow-up"}
+              </button>
+              <button
+                type="button"
+                className="button button-secondary"
+                disabled={isSavingFollowUp || !followUpDate}
+                onClick={() => setFollowUpDate("")}
+              >
+                Clear
+              </button>
+            </div>
+          </form>
         </article>
 
         <article className="content-panel">
