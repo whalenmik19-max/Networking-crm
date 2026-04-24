@@ -101,12 +101,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Signed in as <strong>{currentUser.name}</strong> ({currentUser.email})
           </p>
         </div>
-      ) : isGuestMode ? (
-        <div className="session-bar">
-          <p className="helper-text">
-            Demo mode: changes won&apos;t be saved to an account. Create an account to save your contacts privately.
-          </p>
-        </div>
       ) : null}
 
       <main>{children}</main>
