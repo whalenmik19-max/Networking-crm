@@ -51,15 +51,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
-          <Link
-            href="/contacts/new"
-            className={`header-primary-action desktop-primary-action ${
-              pathname === "/contacts/new" ? "is-active" : ""
-            }`}
-          >
-            + Add Contact
-          </Link>
-
           <div className="header-menu">
             <nav id="main-navigation" className="nav" aria-label="Main navigation">
               {navItems.map((item) => {
@@ -81,17 +72,40 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {currentUser ? (
               <button
                 type="button"
-                className="nav-auth-button nav-auth-button-muted"
+                className="nav-auth-button nav-auth-button-muted mobile-auth-action"
                 onClick={logOut}
               >
                 Log out
               </button>
             ) : (
-              <Link href="/login" className="nav-auth-button">
+              <Link href="/login" className="nav-auth-button mobile-auth-action">
                 Login/Sign Up
               </Link>
             )}
           </div>
+
+          <Link
+            href="/contacts/new"
+            className={`header-primary-action desktop-primary-action ${
+              pathname === "/contacts/new" ? "is-active" : ""
+            }`}
+          >
+            + Add Contact
+          </Link>
+
+          {currentUser ? (
+            <button
+              type="button"
+              className="nav-auth-button nav-auth-button-muted desktop-auth-action"
+              onClick={logOut}
+            >
+              Log out
+            </button>
+          ) : (
+            <Link href="/login" className="nav-auth-button desktop-auth-action">
+              Login/Sign Up
+            </Link>
+          )}
         </div>
       </header>
 

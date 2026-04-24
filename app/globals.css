@@ -135,6 +135,14 @@ h3 {
   display: inline-flex;
 }
 
+.desktop-auth-action {
+  display: inline-flex;
+}
+
+.mobile-auth-action {
+  display: none;
+}
+
 .mobile-menu-toggle {
   display: none;
   align-items: center;
@@ -1791,6 +1799,14 @@ small {
     display: none;
   }
 
+  .desktop-auth-action {
+    display: none;
+  }
+
+  .mobile-auth-action {
+    display: none;
+  }
+
   .header-actions .nav,
   .header-actions .header-menu {
     display: none;
@@ -1798,6 +1814,10 @@ small {
 
   .header-actions.is-open .header-menu {
     display: flex;
+  }
+
+  .header-actions.is-open .mobile-auth-action {
+    display: inline-flex;
   }
 
   .header-actions.is-open .header-menu {
