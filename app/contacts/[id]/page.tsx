@@ -167,7 +167,7 @@ export default function ContactDetailPage() {
       </section>
 
       <section className="detail-grid">
-        <article className="content-panel">
+        <article className="content-panel notes-panel">
           <h2>Relationship snapshot</h2>
           <dl className="detail-list">
             <div>
@@ -285,7 +285,7 @@ export default function ContactDetailPage() {
                 </ul>
               </article>
 
-              <article className="prep-card">
+              <article className="prep-card prep-card-wide">
                 <p className="prep-label">Suggested talking points</p>
                 <ul className="prep-list">
                   {conversationPrep.followUpTalkingPoints.map((point) => (

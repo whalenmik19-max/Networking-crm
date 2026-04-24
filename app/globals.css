@@ -558,6 +558,15 @@ h3 {
   gap: 0.85rem;
 }
 
+.notes-panel {
+  display: grid;
+  align-content: start;
+}
+
+.notes-panel textarea {
+  min-height: 240px;
+}
+
 .inline-follow-up-actions {
   justify-content: flex-start;
 }
