@@ -22,7 +22,7 @@ import { isProPlan } from "@/lib/plans";
 export default function ContactDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { currentUser, isGuestMode } = useAuth();
+  const { currentUser, isGuestMode, isLoading } = useAuth();
   const { contacts, deleteContact, updateContact, isContactsLoading, contactsError } =
     useContacts();
   const contact = contacts.find((item) => item.id === params.id);
@@ -43,7 +43,7 @@ export default function ContactDetailPage() {
     setNotesValue(contact?.notes ?? "");
   }, [contact?.notes]);
 
-  if (isContactsLoading) {
+  if (isLoading || (currentUser && isContactsLoading)) {
     return (
       <div className="empty-page">
         <div className="content-panel">
@@ -167,7 +167,7 @@ export default function ContactDetailPage() {
       </section>
 
       <section className="detail-grid">
-        <article className="content-panel notes-panel">
+        <article className="content-panel">
           <h2>Relationship snapshot</h2>
           <dl className="detail-list">
             <div>
@@ -226,7 +226,7 @@ export default function ContactDetailPage() {
           </form>
         </article>
 
-        <article className="content-panel">
+        <article className="content-panel notes-panel">
           <h2>Notes</h2>
           <form className="inline-notes-form" onSubmit={handleNotesSubmit}>
             <div className="field">

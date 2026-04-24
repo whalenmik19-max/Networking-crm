@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
 import { ContactForm } from "@/components/contact-form";
 import { useContacts } from "@/components/contacts-provider";
 
 export default function EditContactPage() {
   const params = useParams<{ id: string }>();
+  const { currentUser, isLoading } = useAuth();
   const { contacts, isContactsLoading, contactsError } = useContacts();
   const contact = contacts.find((item) => item.id === params.id);
 
-  if (isContactsLoading) {
+  if (isLoading || (currentUser && isContactsLoading)) {
     return (
       <div className="empty-page">
         <div className="content-panel">
