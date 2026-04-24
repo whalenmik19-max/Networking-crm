@@ -1094,6 +1094,10 @@ h3 {
   align-content: center;
 }
 
+.auth-back-link {
+  margin-bottom: 1rem;
+}
+
 .auth-form {
   padding: 1.5rem;
 }

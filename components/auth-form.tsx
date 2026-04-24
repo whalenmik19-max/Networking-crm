@@ -63,6 +63,9 @@ export function AuthForm({ mode }: AuthFormProps) {
     <div className="auth-wrapper">
       <section className="auth-card">
         <div className="auth-copy">
+          <Link href="/" className="text-link auth-back-link">
+            Back to Keeply
+          </Link>
           <p className="eyebrow">{mode === "signup" ? "Sign up" : "Log in"}</p>
           <h1>
             {mode === "signup"

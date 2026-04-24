@@ -90,22 +90,6 @@ export default function DashboardPage() {
         </section>
       ) : null}
 
-      {isGuestMode ? (
-        <section className="trial-banner demo-mode-banner">
-          <div>
-            <p className="eyebrow">Demo mode</p>
-            <p className="section-copy">
-              Demo mode: changes won&apos;t be saved to an account. Create an account to save your contacts privately.
-            </p>
-          </div>
-          <div className="hero-actions">
-            <Link href="/signup" className="button button-primary">
-              Create an account
-            </Link>
-          </div>
-        </section>
-      ) : null}
-
       {contactsError ? (
         <section className="content-panel">
           <p className="auth-error">{contactsError}</p>
@@ -319,6 +303,140 @@ export default function DashboardPage() {
           )}
         </article>
 
+      </section>
+      ) : null}
+
+      {!isContactsLoading ? (
+      <section className="dashboard-grid">
+        <article className="content-panel dashboard-panel">
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Signature feature</p>
+              <h2>What to say next</h2>
+            </div>
+            {!isPro && isFree ? <UpgradeButton className="button button-secondary" /> : null}
+          </div>
+
+          {!isPro && isGuestMode && guestPreviewContacts.length > 0 ? (
+            <div className="conversation-prep-list">
+              {guestPreviewContacts.map((contact) => {
+                const prep = getConversationPrep(contact);
+
+                return (
+                  <Link
+                    key={contact.id}
+                    href={`/contacts/${contact.id}`}
+                    className="conversation-prep-card"
+                  >
+                    <div className="action-card-top">
+                      <div>
+                        <h3>{contact.name}</h3>
+                        <p>{formatProfessionalSummary(contact)}</p>
+                      </div>
+                      <span className="status-pill status-neutral">Preview</span>
+                    </div>
+
+                    <div className="prep-meta-grid">
+                      <div>
+                        <p className="prep-label">Last talked</p>
+                        <p className="list-card-meta">
+                          {getLastContactDate(contact)
+                            ? formatDate(getLastContactDate(contact))
+                            : "No date yet"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="prep-label">Topic preview</p>
+                        <p className="list-card-meta">
+                          {prep.keyTopics[0] || "Your notes will show up here"}
+                        </p>
+                      </div>
+
+                      <div className="prep-meta-wide prep-message-card">
+                        <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
+                        <p className="prompt-copy">You could say:</p>
+                        <p className="list-card-meta">
+                          {getPreviewText(prep.suggestedMessage, 16)}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : !isPro ? (
+            <ProLockCard
+              title={
+                isGuestMode
+                  ? "Add up to 3 demo contacts to preview what to say next"
+                  : "Unlock smarter follow-ups with Pro"
+              }
+              description={
+                isGuestMode
+                  ? "Guests can preview suggested follow-ups and prep on the first 3 contacts they add. Full insights stay on Pro."
+                  : "Pro gives you AI-powered follow-ups, quick talking points, and prep notes before you reconnect."
+              }
+            />
+          ) : prepContacts.length === 0 ? (
+            <p className="section-copy">
+              Once you schedule a follow-up, Keeply will help you prep here.
+            </p>
+          ) : (
+            <div className="conversation-prep-list">
+              {prepContacts.map((contact) => {
+                const prep = getConversationPrep(contact);
+
+                return (
+                  <Link
+                    key={contact.id}
+                    href={`/contacts/${contact.id}`}
+                    className="conversation-prep-card"
+                  >
+                    <div className="action-card-top">
+                      <div>
+                        <h3>{contact.name}</h3>
+                        <p>{formatProfessionalSummary(contact)}</p>
+                      </div>
+                      <span className="status-pill status-neutral">
+                        {contact.nextFollowUpDate
+                          ? formatOptionalDate(contact.nextFollowUpDate)
+                          : "Prep"}
+                      </span>
+                    </div>
+
+                    <div className="prep-meta-grid">
+                      <div>
+                        <p className="prep-label">Last talked</p>
+                        <p className="list-card-meta">
+                          {getLastContactDate(contact)
+                            ? formatDate(getLastContactDate(contact))
+                            : "No date yet"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="prep-label">Topics</p>
+                        <p className="list-card-meta">
+                          {prep.keyTopics.slice(0, 2).join(" • ") || "No topics yet"}
+                        </p>
+                      </div>
+
+                      <div className="prep-meta-wide prep-message-card">
+                        <p className="prep-label prep-emphasis-label">What to say next</p>
+                        <p className="prompt-copy">You could say:</p>
+                        <p className="list-card-meta">
+                          {prep.followUpTalkingPoints[0] || prep.suggestedMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </article>
+
         <article className="content-panel dashboard-panel">
           <div className="panel-header">
             <div>
@@ -356,137 +474,6 @@ export default function DashboardPage() {
             </div>
           )}
         </article>
-      </section>
-      ) : null}
-
-      {!isContactsLoading ? (
-      <section className="content-panel dashboard-panel">
-        <div className="panel-header">
-          <div>
-            <p className="eyebrow">Signature feature</p>
-            <h2>What to say next</h2>
-          </div>
-          {!isPro && isFree ? <UpgradeButton className="button button-secondary" /> : null}
-        </div>
-
-        {!isPro && isGuestMode && guestPreviewContacts.length > 0 ? (
-          <div className="conversation-prep-list">
-            {guestPreviewContacts.map((contact) => {
-              const prep = getConversationPrep(contact);
-
-              return (
-                <Link
-                  key={contact.id}
-                  href={`/contacts/${contact.id}`}
-                  className="conversation-prep-card"
-                >
-                  <div className="action-card-top">
-                    <div>
-                      <h3>{contact.name}</h3>
-                      <p>{formatProfessionalSummary(contact)}</p>
-                    </div>
-                    <span className="status-pill status-neutral">Preview</span>
-                  </div>
-
-                  <div className="prep-meta-grid">
-                    <div>
-                      <p className="prep-label">Last talked</p>
-                      <p className="list-card-meta">
-                        {getLastContactDate(contact)
-                          ? formatDate(getLastContactDate(contact))
-                          : "No date yet"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="prep-label">Topic preview</p>
-                      <p className="list-card-meta">
-                        {prep.keyTopics[0] || "Your notes will show up here"}
-                      </p>
-                    </div>
-
-                    <div className="prep-meta-wide prep-message-card">
-                      <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
-                      <p className="prompt-copy">You could say:</p>
-                      <p className="list-card-meta">
-                        {getPreviewText(prep.suggestedMessage, 16)}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ) : !isPro ? (
-          <ProLockCard
-            title={
-              isGuestMode
-                ? "Add up to 3 demo contacts to preview what to say next"
-                : "Unlock smarter follow-ups with Pro"
-            }
-            description={
-              isGuestMode
-                ? "Guests can preview suggested follow-ups and prep on the first 3 contacts they add. Full insights stay on Pro."
-                : "Pro gives you AI-powered follow-ups, quick talking points, and prep notes before you reconnect."
-            }
-          />
-        ) : prepContacts.length === 0 ? (
-          <p className="section-copy">
-            Once you schedule a follow-up, Keeply will help you prep here.
-          </p>
-        ) : (
-          <div className="conversation-prep-list">
-            {prepContacts.map((contact) => {
-              const prep = getConversationPrep(contact);
-
-              return (
-                <Link
-                  key={contact.id}
-                  href={`/contacts/${contact.id}`}
-                  className="conversation-prep-card"
-                >
-                  <div className="action-card-top">
-                    <div>
-                      <h3>{contact.name}</h3>
-                      <p>{formatProfessionalSummary(contact)}</p>
-                    </div>
-                    <span className="status-pill status-neutral">
-                      {contact.nextFollowUpDate
-                        ? formatOptionalDate(contact.nextFollowUpDate)
-                        : "Prep"}
-                    </span>
-                  </div>
-
-                  <div className="prep-meta-grid">
-                    <div>
-                      <p className="prep-label">Last talked</p>
-                      <p className="list-card-meta">
-                        {getLastContactDate(contact)
-                          ? formatDate(getLastContactDate(contact))
-                          : "No date yet"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="prep-label">Topics</p>
-                      <p className="list-card-meta">
-                        {prep.keyTopics.slice(0, 2).join(" • ") || "No topics yet"}
-                      </p>
-                    </div>
-
-                    <div className="prep-meta-wide prep-message-card">
-                      <p className="prep-label prep-emphasis-label">What to say next</p>
-                      <p className="prompt-copy">You could say:</p>
-                      <p className="list-card-meta">
-                        {prep.followUpTalkingPoints[0] || prep.suggestedMessage}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
       </section>
       ) : null}
     </div>
