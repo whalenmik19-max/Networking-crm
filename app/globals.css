@@ -320,6 +320,7 @@ h3 {
 
 .hero-actions-signed-in {
   width: min(240px, 100%);
+  align-self: center;
 }
 
 .hero-guest {
