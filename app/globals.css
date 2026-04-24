@@ -139,7 +139,7 @@ h3 {
   display: inline-flex;
 }
 
-.mobile-auth-action {
+.header-menu .mobile-auth-action {
   display: none;
 }
 
@@ -1803,7 +1803,7 @@ small {
     display: none;
   }
 
-  .mobile-auth-action {
+  .header-menu .mobile-auth-action {
     display: none;
   }
 
@@ -1816,7 +1816,7 @@ small {
     display: flex;
   }
 
-  .header-actions.is-open .mobile-auth-action {
+  .header-actions.is-open .header-menu .mobile-auth-action {
     display: inline-flex;
   }
 
