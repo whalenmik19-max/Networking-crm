@@ -55,10 +55,20 @@ export default function DashboardPage() {
             you left off.
           </p>
         </div>
-        <div className={`hero-actions ${!currentUser ? "hero-actions-centered" : ""}`}>
-          <Link className="button button-primary" href="/contacts/new">
-            {currentUser ? "Add a contact" : "Add your first contact"}
-          </Link>
+        <div
+          className={`hero-actions hero-actions-centered ${
+            currentUser ? "hero-actions-signed-in" : ""
+          }`}
+        >
+          {currentUser ? (
+            <Link className="button button-primary" href="/contacts">
+              View all contacts
+            </Link>
+          ) : (
+            <Link className="button button-primary" href="/contacts/new">
+              Add your first contact
+            </Link>
+          )}
           {!isPro && currentUser ? <UpgradeButton /> : null}
           {!currentUser ? (
             <Link className="button button-secondary" href="/signup">
@@ -114,7 +124,7 @@ export default function DashboardPage() {
                   } today.`
                 : "You&apos;re caught up for today."}
             </h2>
-            <p className="section-copy">
+            <p className="section-copy priority-panel-copy">
               {overdueFollowUps.length > 0
                 ? "Start with your overdue follow-ups first, then move into what is due this week."
                 : "Nothing is overdue right now, so you can focus on this week’s follow-ups and conversation prep."}
