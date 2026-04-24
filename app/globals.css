@@ -564,7 +564,10 @@ h3 {
 }
 
 .notes-panel textarea {
-  min-height: 240px;
+  height: 154px;
+  min-height: 154px;
+  max-height: 154px;
+  resize: none;
 }
 
 .inline-follow-up-actions {
