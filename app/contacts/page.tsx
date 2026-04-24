@@ -12,6 +12,7 @@ import {
   formatProfessionalSummary,
   getInitials,
   getPrioritySortedContacts,
+  getRelationshipStrengthLabel,
   searchContacts,
 } from "@/lib/contact-utils";
 import { isProPlan } from "@/lib/plans";
@@ -86,11 +87,7 @@ export default function ContactsPage() {
         </section>
       ) : null}
 
-      {isProPlan(currentUser?.plan) ? (
-        <p className="helper-text table-hint">
-          Pro sorting is on, so overdue and high-priority relationships float to the top.
-        </p>
-      ) : (
+      {isProPlan(currentUser?.plan) ? null : (
         <section className="content-panel pro-inline-banner">
           <div>
             <p className="eyebrow">Pro sorting</p>
@@ -138,6 +135,7 @@ export default function ContactsPage() {
               <span>Name</span>
               <span>Company</span>
               <span>Date met</span>
+              <span>Priority</span>
               <span>Relationship</span>
               <span>Next follow-up</span>
               <span />
@@ -158,6 +156,7 @@ export default function ContactsPage() {
                 </span>
                 <span>{contact.company || "Not added yet"}</span>
                 <span>{contact.dateMet ? formatDate(contact.dateMet) : "Not added yet"}</span>
+                <span>{getRelationshipStrengthLabel(contact)}</span>
                 <span>{contact.relationshipType || "Not added yet"}</span>
                 <span>{formatOptionalDate(contact.nextFollowUpDate)}</span>
                 <span className="view-cell">View →</span>

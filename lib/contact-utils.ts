@@ -207,6 +207,18 @@ export function getRecentlyAddedContacts(contacts: Contact[]) {
 }
 
 function getRelationshipPriority(contact: Contact) {
+  if (contact.priority === "High Priority") {
+    return 3;
+  }
+
+  if (contact.priority === "Warm Connection") {
+    return 2;
+  }
+
+  if (contact.priority === "Needs Attention") {
+    return 1;
+  }
+
   const normalizedType = contact.relationshipType.trim().toLowerCase();
 
   if (["mentor", "recruiter", "professor", "alum"].includes(normalizedType)) {
