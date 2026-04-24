@@ -564,9 +564,9 @@ h3 {
 }
 
 .notes-panel .inline-notes-form .field textarea {
-  height: 380px;
-  min-height: 380px;
-  max-height: 380px;
+  height: 410px;
+  min-height: 410px;
+  max-height: 410px;
   resize: none;
   overflow-y: auto;
 }
