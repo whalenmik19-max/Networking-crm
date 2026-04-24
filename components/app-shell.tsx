@@ -51,6 +51,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
+          <Link
+            href="/contacts/new"
+            className={`header-primary-action desktop-primary-action ${
+              pathname === "/contacts/new" ? "is-active" : ""
+            }`}
+          >
+            + Add Contact
+          </Link>
+
           <div className="header-menu">
             <nav id="main-navigation" className="nav" aria-label="Main navigation">
               {navItems.map((item) => {
@@ -83,15 +92,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             )}
           </div>
-
-          <Link
-            href="/contacts/new"
-            className={`header-primary-action desktop-primary-action ${
-              pathname === "/contacts/new" ? "is-active" : ""
-            }`}
-          >
-            + Add Contact
-          </Link>
         </div>
       </header>
 
