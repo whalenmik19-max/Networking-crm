@@ -1,11 +1,13 @@
 export const interactionTypes = [
-  "coffee chat",
-  "networking event",
-  "interview",
-  "class",
-  "referral",
-  "email",
-  "other",
+  "Coffee Chat",
+  "Recruiter Call",
+  "Interview",
+  "Class",
+  "Referral",
+  "LinkedIn Message",
+  "Email",
+  "Networking Event",
+  "Other",
 ] as const;
 
 export type InteractionType = string;

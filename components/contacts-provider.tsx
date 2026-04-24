@@ -217,7 +217,14 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
 
         try {
           const updatedContact = await updateSupabaseContact(contactId, updates);
-          const normalizedContact = normalizeContact(updatedContact);
+          const existingContact = signedInContacts.find((contact) => contact.id === contactId);
+          const normalizedContact = normalizeContact({
+            ...existingContact,
+            ...updatedContact,
+            interactions: existingContact?.interactions ?? [],
+            reminderAt: existingContact?.reminderAt ?? "",
+            tags: existingContact?.tags ?? [],
+          });
           setSignedInContacts((current) =>
             current.map((contact) => (contact.id === contactId ? normalizedContact : contact)),
           );

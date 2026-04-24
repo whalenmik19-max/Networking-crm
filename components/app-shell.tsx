@@ -14,6 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/contacts", label: "Contacts" },
     { href: "/pricing", label: "Pricing" },
     { href: "/feedback", label: "Feedback" },
+    ...(currentUser ? [{ href: "/admin", label: "Admin" }] : []),
     ...(currentUser ? [{ href: "/settings", label: "Settings" }] : []),
   ];
 
@@ -81,7 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       ) : isGuestMode ? (
         <div className="session-bar">
           <p className="helper-text">
-            You&apos;re exploring the Keeply sample workspace. Create an account to save your own private contacts.
+            Demo mode: changes won&apos;t be saved to an account. Create an account to save your contacts privately.
           </p>
         </div>
       ) : null}

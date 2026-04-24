@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase/server-admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type FeedbackRequestBody = {
@@ -39,9 +38,9 @@ export async function POST(request: Request) {
 
   let userId: string | null = null;
   let userEmail: string | null = null;
+  const supabaseServer = await getSupabaseServerClient();
 
   try {
-    const supabaseServer = await getSupabaseServerClient();
     const {
       data: { user },
       error,
@@ -57,8 +56,7 @@ export async function POST(request: Request) {
     console.error(sessionError);
   }
 
-  const supabaseAdmin = getSupabaseAdminClient();
-  const { error: insertError } = await supabaseAdmin.from("feedback_submissions").insert({
+  const { error: insertError } = await supabaseServer.from("feedback_submissions").insert({
     category,
     message,
     user_id: userId,

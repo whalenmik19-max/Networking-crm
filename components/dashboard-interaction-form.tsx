@@ -135,7 +135,7 @@ export function DashboardInteractionForm() {
         </div>
 
         <div className="field field-full">
-          <label htmlFor="dashboard-type">Type of meeting</label>
+          <label htmlFor="dashboard-type">Interaction type</label>
           <input
             id="dashboard-type"
             list="dashboard-interaction-types"
@@ -144,7 +144,7 @@ export function DashboardInteractionForm() {
             onChange={(event) =>
               setFormState((current) => ({ ...current, type: event.target.value }))
             }
-            placeholder="Coffee chat, recruiter call, intro meeting..."
+            placeholder="Coffee Chat, Recruiter Call, LinkedIn Message..."
           />
           <datalist id="dashboard-interaction-types">
             {interactionTypes.map((type) => (

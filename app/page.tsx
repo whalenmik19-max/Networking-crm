@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { DashboardInteractionForm } from "@/components/dashboard-interaction-form";
+import { FollowUpActionForm } from "@/components/follow-up-action-form";
 import { ProLockCard } from "@/components/pro-lock-card";
 import { UpgradeButton } from "@/components/upgrade-button";
 import { EmptyState } from "@/components/empty-state";
@@ -13,6 +14,7 @@ import {
   formatDate,
   formatOptionalDate,
   formatProfessionalSummary,
+  getRelationshipStrengthLabel,
   getDaysSinceLastContact,
   getFollowUpsDueThisWeek,
   getInactiveContacts,
@@ -84,6 +86,22 @@ export default function DashboardPage() {
               Create an account
             </Link>
             <UpgradeButton className="button button-secondary" />
+          </div>
+        </section>
+      ) : null}
+
+      {isGuestMode ? (
+        <section className="trial-banner demo-mode-banner">
+          <div>
+            <p className="eyebrow">Demo mode</p>
+            <p className="section-copy">
+              Demo mode: changes won&apos;t be saved to an account. Create an account to save your contacts privately.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <Link href="/signup" className="button button-primary">
+              Create an account
+            </Link>
           </div>
         </section>
       ) : null}
@@ -172,18 +190,24 @@ export default function DashboardPage() {
           ) : (
             <div className="action-list">
               {overdueFollowUps.map((contact) => (
-                <Link key={contact.id} href={`/contacts/${contact.id}`} className="action-card">
-                  <div className="action-card-top">
-                    <div>
-                      <h3>{contact.name}</h3>
-                      <p>{formatProfessionalSummary(contact)}</p>
+                <article key={contact.id} className="action-card action-card-with-form">
+                  <Link href={`/contacts/${contact.id}`} className="action-card-link">
+                    <div className="action-card-top">
+                      <div>
+                        <h3>{contact.name}</h3>
+                        <p>{formatProfessionalSummary(contact)}</p>
+                      </div>
+                      <span className="status-pill status-danger">Overdue</span>
                     </div>
-                    <span className="status-pill status-danger">Overdue</span>
-                  </div>
-                  <p className="list-card-meta">
-                    Follow-up date: {formatOptionalDate(contact.nextFollowUpDate)}
-                  </p>
-                </Link>
+                    <p className="list-card-meta">
+                      Follow-up date: {formatOptionalDate(contact.nextFollowUpDate)}
+                    </p>
+                    <p className="list-card-meta relationship-strength-label">
+                      {getRelationshipStrengthLabel(contact)}
+                    </p>
+                  </Link>
+                  <FollowUpActionForm contact={contact} />
+                </article>
               ))}
             </div>
           )}
@@ -203,18 +227,24 @@ export default function DashboardPage() {
           ) : (
             <div className="action-list">
               {dueThisWeek.map((contact) => (
-                <Link key={contact.id} href={`/contacts/${contact.id}`} className="action-card">
-                  <div className="action-card-top">
-                    <div>
-                      <h3>{contact.name}</h3>
-                      <p>{formatProfessionalSummary(contact)}</p>
+                <article key={contact.id} className="action-card action-card-with-form">
+                  <Link href={`/contacts/${contact.id}`} className="action-card-link">
+                    <div className="action-card-top">
+                      <div>
+                        <h3>{contact.name}</h3>
+                        <p>{formatProfessionalSummary(contact)}</p>
+                      </div>
+                      <span className="status-pill status-warning">
+                        {formatDate(contact.nextFollowUpDate)}
+                      </span>
                     </div>
-                    <span className="status-pill status-warning">
-                      {formatDate(contact.nextFollowUpDate)}
-                    </span>
-                  </div>
-                  <p className="list-card-meta">{contact.relationshipType || "Relationship"} </p>
-                </Link>
+                    <p className="list-card-meta">{contact.relationshipType || "Relationship"} </p>
+                    <p className="list-card-meta relationship-strength-label">
+                      {getRelationshipStrengthLabel(contact)}
+                    </p>
+                  </Link>
+                  <FollowUpActionForm contact={contact} />
+                </article>
               ))}
             </div>
           )}

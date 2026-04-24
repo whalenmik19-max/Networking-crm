@@ -49,6 +49,20 @@ export function formatProfessionalSummary(contact: Contact) {
   return "No company or role added yet";
 }
 
+export function getRelationshipStrengthLabel(contact: Contact) {
+  const normalizedType = contact.relationshipType.trim().toLowerCase();
+
+  if (["mentor", "recruiter", "professor", "alum"].includes(normalizedType)) {
+    return "High priority";
+  }
+
+  if (["peer", "friend"].includes(normalizedType)) {
+    return "Warm connection";
+  }
+
+  return "Needs attention";
+}
+
 export function getInitials(name: string) {
   return name
     .trim()

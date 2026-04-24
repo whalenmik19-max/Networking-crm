@@ -67,7 +67,7 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
         </div>
 
         <div className="field">
-          <label htmlFor="interaction-type">Type of meeting</label>
+          <label htmlFor="interaction-type">Interaction type</label>
           <input
             id="interaction-type"
             list="interaction-types"
@@ -76,7 +76,7 @@ export function InteractionForm({ contactId }: InteractionFormProps) {
             onChange={(event) =>
               setFormState((current) => ({ ...current, type: event.target.value }))
             }
-            placeholder="Coffee chat, recruiter call, intro meeting..."
+            placeholder="Coffee Chat, Recruiter Call, LinkedIn Message..."
           />
           <datalist id="interaction-types">
             {interactionTypes.map((type) => (
