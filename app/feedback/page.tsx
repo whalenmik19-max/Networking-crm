@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function FeedbackPage() {
   const [message, setMessage] = useState("");
@@ -20,18 +19,25 @@ export default function FeedbackPage() {
     }
 
     setIsSending(true);
-    const supabase = getSupabaseBrowserClient();
-
-    const { error } = await supabase.from("feedback_submissions").insert({
-      category,
-      message: trimmedMessage,
+    const response = await fetch("/api/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        category,
+        message: trimmedMessage,
+      }),
     });
-
     setIsSending(false);
 
-    if (error) {
-      console.error("Feedback submission failed:", error);
-      setStatus(error.message || "We couldn't send your feedback right now.");
+    const result = (await response.json()) as {
+      success: boolean;
+      error?: string;
+    };
+
+    if (!response.ok || !result.success) {
+      setStatus(result.error || "We couldn't send your feedback right now.");
       return;
     }
 
