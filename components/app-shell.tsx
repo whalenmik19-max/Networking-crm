@@ -7,14 +7,14 @@ import { LogoMark } from "@/components/logo-mark";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { currentUser, isGuestMode, logOut } = useAuth();
+  const { currentUser, isAdmin, isGuestMode, logOut } = useAuth();
   const isAuthPage = pathname === "/login" || pathname === "/signup";
   const navItems = [
     { href: "/", label: "Dashboard" },
     { href: "/contacts", label: "Contacts" },
     { href: "/pricing", label: "Pricing" },
     { href: "/feedback", label: "Feedback" },
-    ...(currentUser ? [{ href: "/admin", label: "Admin" }] : []),
+    ...(currentUser && isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
     ...(currentUser ? [{ href: "/settings", label: "Settings" }] : []),
   ];
 

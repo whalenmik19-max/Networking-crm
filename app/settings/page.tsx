@@ -34,13 +34,8 @@ function normalizeSettings(
       weeklyDigest:
         storedSettings?.notifications?.weeklyDigest ??
         defaultUserSettings.notifications.weeklyDigest,
-      notificationEmail:
-        storedSettings?.notifications?.notificationEmail?.trim() ||
-        currentUser?.email ||
-        defaultUserSettings.notifications.notificationEmail,
-      notificationPhone:
-        storedSettings?.notifications?.notificationPhone ??
-        defaultUserSettings.notifications.notificationPhone,
+      notificationEmail: currentUser?.email || defaultUserSettings.notifications.notificationEmail,
+      notificationPhone: storedSettings?.notifications?.notificationPhone ?? "",
     },
   };
 }
@@ -264,8 +259,7 @@ export default function SettingsPage() {
           <p className="eyebrow">Settings</p>
           <h1>Manage your Keeply account</h1>
           <p className="section-copy">
-            Update your profile, choose a subscription tier, and decide how you want
-            reminders to reach you.
+            Update your profile and choose the Keeply plan that fits you.
           </p>
         </div>
       </section>
@@ -277,7 +271,7 @@ export default function SettingsPage() {
       )}
 
       <div className="settings-grid">
-        <section className="form-panel">
+        <section className="form-panel settings-card">
           <div className="panel-header">
             <div>
               <p className="eyebrow">Profile</p>
@@ -325,11 +319,11 @@ export default function SettingsPage() {
           </form>
         </section>
 
-        <section className="form-panel">
+        <section className="form-panel settings-card">
           <div className="panel-header">
             <div>
               <p className="eyebrow">Subscription</p>
-              <h2>Plan and notifications</h2>
+              <h2>Plan and reminders</h2>
             </div>
           </div>
 
@@ -355,30 +349,6 @@ export default function SettingsPage() {
               <Link href="/pricing" className="text-link">
                 View plan comparison
               </Link>
-            </div>
-
-            <div className="field">
-              <label htmlFor="notification-email">Notification Email</label>
-              <input
-                id="notification-email"
-                type="email"
-                value={settings.notifications.notificationEmail}
-                onChange={(event) =>
-                  updateNotificationField("notificationEmail", event.target.value)
-                }
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="notification-phone">Notification Phone Number</label>
-              <input
-                id="notification-phone"
-                value={settings.notifications.notificationPhone}
-                onChange={(event) =>
-                  updateNotificationField("notificationPhone", event.target.value)
-                }
-                placeholder="Optional"
-              />
             </div>
 
             <div className="settings-checkboxes">

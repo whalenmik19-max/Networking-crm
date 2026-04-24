@@ -236,7 +236,6 @@ export default function ContactDetailPage() {
           <h2>Notes</h2>
           <form className="inline-notes-form" onSubmit={handleNotesSubmit}>
             <div className="field">
-              <label htmlFor="contact-notes">Your notes</label>
               <textarea
                 id="contact-notes"
                 value={notesValue}

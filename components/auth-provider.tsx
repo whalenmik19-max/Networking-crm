@@ -34,6 +34,7 @@ type AccountUpdateResult = Promise<{
 
 type AuthContextValue = {
   currentUser: PublicAuthUser | null;
+  isAdmin: boolean;
   isGuestMode: boolean;
   isLoading: boolean;
   signUp: (input: { name: string; email: string; password: string }) => AuthResult;
@@ -48,6 +49,32 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+function parseCsv(value: string | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function isAdminAccount(user: PublicAuthUser | null) {
+  if (!user) {
+    return false;
+  }
+
+  const allowedUserIds = parseCsv(process.env.NEXT_PUBLIC_ADMIN_USER_IDS);
+  const allowedEmails = parseCsv(process.env.NEXT_PUBLIC_ADMIN_EMAILS).map((email) =>
+    email.toLowerCase(),
+  );
+
+  return (
+    allowedUserIds.includes(user.id) || allowedEmails.includes(user.email.toLowerCase())
+  );
+}
 
 function toPublicUser(user: User): PublicAuthUser {
   const metadataName = user.user_metadata.name;
@@ -116,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return {
       currentUser,
+      isAdmin: isAdminAccount(currentUser),
       isGuestMode: !currentUser,
       isLoading,
       signUp: async ({ name, email, password }) => {
