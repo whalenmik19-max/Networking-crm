@@ -16,6 +16,10 @@
   --radius-panel: 24px;
   --radius-card: 18px;
   --radius-pill: 18px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
 }
 
 * {
@@ -550,8 +554,8 @@ h3 {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .detail-actions {
@@ -569,15 +573,15 @@ h3 {
 
 .inline-follow-up-form {
   display: grid;
-  gap: 0.85rem;
-  margin-top: 1.15rem;
-  padding-top: 1rem;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--border);
 }
 
 .inline-notes-form {
   display: grid;
-  gap: 0.85rem;
+  gap: var(--space-3);
 }
 
 .notes-panel {
@@ -948,12 +952,12 @@ h3 {
 
 .form-panel {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-2);
 }
 
 .settings-form {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-3);
 }
 
 .settings-card {
@@ -963,14 +967,14 @@ h3 {
 
 .settings-checkboxes {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-2);
 }
 
 .toggle-field {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
+  gap: var(--space-2);
+  padding: var(--space-2);
   border-radius: 18px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.82);
@@ -987,13 +991,13 @@ h3 {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-2);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: var(--space-1);
 }
 
 .field label {
@@ -1030,15 +1034,11 @@ h3 {
 }
 
 .compact-form .panel-header {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-2);
 }
 
 .compact-form .form-grid {
-  gap: 0.85rem;
-}
-
-.compact-form .field {
-  gap: 0.35rem;
+  gap: var(--space-2);
 }
 
 .compact-form .field textarea {
@@ -1046,7 +1046,7 @@ h3 {
 }
 
 .compact-form .form-actions {
-  margin-top: 0.5rem;
+  margin-top: var(--space-1);
 }
 
 .field-full {
@@ -1061,13 +1061,18 @@ h3 {
 
 .form-note,
 .table-hint {
-  margin-top: -0.25rem;
+  margin-top: calc(var(--space-1) * -1);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 0.25rem;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.form-actions-start {
+  justify-content: flex-start;
 }
 
 .danger-panel {
@@ -1077,8 +1082,8 @@ h3 {
 
 .deletion-request-card {
   display: grid;
-  gap: 0.45rem;
-  padding: 1rem 1.05rem;
+  gap: var(--space-1);
+  padding: var(--space-2);
   border-radius: var(--radius-card);
   border: 1px solid rgba(158, 55, 35, 0.14);
   background: rgba(255, 255, 255, 0.78);
@@ -1537,35 +1542,21 @@ h3 {
 
 .reminder-card {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-3);
   align-content: start;
 }
 
 .reminder-card .panel-header {
-  margin-bottom: 0.65rem;
+  margin-bottom: 0;
 }
 
 .reminder-card .section-copy {
-  margin: 0 0 0.35rem;
-}
-
-.reminder-card .field {
-  gap: 0.35rem;
-}
-
-.reminder-card .helper-text {
-  margin-top: 0.1rem;
+  margin: 0;
 }
 
 .admin-request-card {
   display: grid;
-  gap: 0.75rem;
-}
-
-.reminder-actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 strong {

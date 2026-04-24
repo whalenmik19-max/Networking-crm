@@ -146,7 +146,7 @@ export function ReminderCard({ contactId, contactName }: ReminderCardProps) {
         </p>
       </div>
 
-      <div className="reminder-actions">
+      <div className="form-actions form-actions-start">
         <button type="button" className="button button-primary" onClick={handleSetReminder}>
           Set notification
         </button>

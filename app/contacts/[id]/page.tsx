@@ -212,7 +212,7 @@ export default function ContactDetailPage() {
             </div>
             {followUpError ? <p className="auth-error">{followUpError}</p> : null}
             {followUpStatus ? <p className="helper-text">{followUpStatus}</p> : null}
-            <div className="form-actions inline-follow-up-actions">
+            <div className="form-actions form-actions-start">
               <button
                 type="submit"
                 className="button button-primary"
@@ -245,7 +245,7 @@ export default function ContactDetailPage() {
             </div>
             {notesError ? <p className="auth-error">{notesError}</p> : null}
             {notesStatus ? <p className="helper-text">{notesStatus}</p> : null}
-            <div className="form-actions inline-follow-up-actions">
+            <div className="form-actions form-actions-start">
               <button
                 type="submit"
                 className="button button-primary"
