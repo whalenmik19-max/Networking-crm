@@ -60,15 +60,11 @@ export default function DashboardPage() {
             {currentUser ? "Add a contact" : "Add your first contact"}
           </Link>
           {!isPro && currentUser ? <UpgradeButton /> : null}
-          {currentUser ? (
-            <Link className="button button-secondary" href="/contacts">
-              View all contacts
-            </Link>
-          ) : (
+          {!currentUser ? (
             <Link className="button button-secondary" href="/signup">
               Create an account
             </Link>
-          )}
+          ) : null}
         </div>
       </section>
 

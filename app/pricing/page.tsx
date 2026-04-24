@@ -144,7 +144,7 @@ export default function PricingPage() {
       <section className="content-panel">
         <p className="eyebrow">Current setup</p>
         <h2>Pro is currently a demo version</h2>
-        <p className="section-copy">
+        <p className="section-copy pricing-current-setup-copy">
           Keeply currently simulates plan changes so people can try the Pro experience without real billing yet.
         </p>
       </section>
