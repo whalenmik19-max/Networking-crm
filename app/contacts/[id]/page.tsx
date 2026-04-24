@@ -30,10 +30,18 @@ export default function ContactDetailPage() {
   const [followUpStatus, setFollowUpStatus] = useState("");
   const [followUpError, setFollowUpError] = useState("");
   const [isSavingFollowUp, setIsSavingFollowUp] = useState(false);
+  const [notesValue, setNotesValue] = useState("");
+  const [notesStatus, setNotesStatus] = useState("");
+  const [notesError, setNotesError] = useState("");
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
 
   useEffect(() => {
     setFollowUpDate(contact?.nextFollowUpDate ?? "");
   }, [contact?.nextFollowUpDate]);
+
+  useEffect(() => {
+    setNotesValue(contact?.notes ?? "");
+  }, [contact?.notes]);
 
   if (isContactsLoading) {
     return (
@@ -100,6 +108,27 @@ export default function ContactDetailPage() {
     }
 
     setFollowUpStatus(followUpDate ? "Next follow-up saved." : "Next follow-up cleared.");
+  }
+
+  async function handleNotesSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setNotesStatus("");
+    setNotesError("");
+    setIsSavingNotes(true);
+
+    const updatedContact = await updateContact(activeContact.id, {
+      ...activeContact,
+      notes: notesValue.trim(),
+    });
+
+    setIsSavingNotes(false);
+
+    if (!updatedContact) {
+      setNotesError("We couldn't save your notes right now.");
+      return;
+    }
+
+    setNotesStatus("Notes saved.");
   }
 
   return (
@@ -199,7 +228,28 @@ export default function ContactDetailPage() {
 
         <article className="content-panel">
           <h2>Notes</h2>
-          <p className="notes-copy">{activeContact.notes}</p>
+          <form className="inline-notes-form" onSubmit={handleNotesSubmit}>
+            <div className="field">
+              <label htmlFor="contact-notes">Your notes</label>
+              <textarea
+                id="contact-notes"
+                value={notesValue}
+                onChange={(event) => setNotesValue(event.target.value)}
+                placeholder="Capture context, details, and anything you want Keeply to remember."
+              />
+            </div>
+            {notesError ? <p className="auth-error">{notesError}</p> : null}
+            {notesStatus ? <p className="helper-text">{notesStatus}</p> : null}
+            <div className="form-actions inline-follow-up-actions">
+              <button
+                type="submit"
+                className="button button-primary"
+                disabled={isSavingNotes}
+              >
+                {isSavingNotes ? "Saving..." : "Save notes"}
+              </button>
+            </div>
+          </form>
           <div className="tag-row">
             {activeContact.tags.map((tag) => (
               <span key={tag} className="tag">

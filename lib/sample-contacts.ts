@@ -12,6 +12,7 @@ export const sampleContacts: Contact[] = [
     dateMet: "2026-03-30",
     whereWeMet: "University alumni panel",
     relationshipType: "alum",
+    priority: "High Priority",
     notes:
       "Shared advice on breaking into healthcare tech and offered to review internship applications in the fall.",
     nextFollowUpDate: "2026-04-20",
@@ -45,6 +46,7 @@ export const sampleContacts: Contact[] = [
     dateMet: "2026-04-02",
     whereWeMet: "Design meetup downtown",
     relationshipType: "peer",
+    priority: "Warm Connection",
     notes:
       "We talked about early-career portfolios, coffee chat etiquette, and junior design roles in Chicago.",
     nextFollowUpDate: "2026-04-24",
@@ -71,6 +73,7 @@ export const sampleContacts: Contact[] = [
     dateMet: "2026-03-18",
     whereWeMet: "Hackathon mentor session",
     relationshipType: "mentor",
+    priority: "High Priority",
     notes:
       "Encouraged me to stay in touch after finals and suggested a few open-source projects to build credibility.",
     nextFollowUpDate: "2026-05-02",

@@ -15,6 +15,7 @@ type ContactRow = {
   date_met?: string | null;
   where_we_met?: string | null;
   relationship_type?: string | null;
+  priority?: string | null;
   notes?: string | null;
   next_follow_up_date?: string | null;
 };
@@ -31,6 +32,12 @@ function mapContactRow(row: ContactRow): Contact {
     dateMet: row.date_met ?? "",
     whereWeMet: row.where_we_met ?? "",
     relationshipType: row.relationship_type ?? "",
+    priority:
+      row.priority === "High Priority" ||
+      row.priority === "Warm Connection" ||
+      row.priority === "Needs Attention"
+        ? row.priority
+        : "Needs Attention",
     notes: row.notes ?? "",
     nextFollowUpDate: row.next_follow_up_date ?? "",
     reminderAt: "",
@@ -51,6 +58,7 @@ function toContactRow(contact: NewContact, userId: string) {
     date_met: contact.dateMet || null,
     where_we_met: contact.whereWeMet,
     relationship_type: contact.relationshipType,
+    priority: contact.priority,
     notes: contact.notes,
     next_follow_up_date: contact.nextFollowUpDate || null,
   };
@@ -125,6 +133,7 @@ export async function updateContact(contactId: string, updates: Partial<NewConta
       ...(updates.relationshipType !== undefined
         ? { relationship_type: updates.relationshipType }
         : {}),
+      ...(updates.priority !== undefined ? { priority: updates.priority } : {}),
       ...(updates.notes !== undefined ? { notes: updates.notes } : {}),
       ...(updates.nextFollowUpDate !== undefined
         ? { next_follow_up_date: updates.nextFollowUpDate || null }

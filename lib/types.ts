@@ -12,6 +12,7 @@ export const interactionTypes = [
 
 export type InteractionType = string;
 export type RelationshipType = string;
+export type ContactPriority = "High Priority" | "Warm Connection" | "Needs Attention";
 
 export type Interaction = {
   id: string;
@@ -31,6 +32,7 @@ export type Contact = {
   dateMet: string;
   whereWeMet: string;
   relationshipType: RelationshipType;
+  priority: ContactPriority;
   notes: string;
   nextFollowUpDate: string;
   reminderAt: string;

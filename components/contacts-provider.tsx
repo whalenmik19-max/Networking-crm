@@ -19,7 +19,13 @@ import {
   getReminders as getSupabaseReminders,
   type Reminder,
 } from "@/lib/supabase/reminders";
-import type { Contact, NewContact, NewInteraction, RelationshipType } from "@/lib/types";
+import type {
+  Contact,
+  ContactPriority,
+  NewContact,
+  NewInteraction,
+  RelationshipType,
+} from "@/lib/types";
 
 type ContactsContextValue = {
   contacts: Contact[];
@@ -52,6 +58,7 @@ function normalizeContact(contact: Partial<Contact>): Contact {
     dateMet: contact.dateMet ?? "",
     whereWeMet: contact.whereWeMet ?? "",
     relationshipType: (contact.relationshipType ?? "other") as RelationshipType,
+    priority: (contact.priority ?? "Needs Attention") as ContactPriority,
     notes: contact.notes ?? "",
     nextFollowUpDate: contact.nextFollowUpDate ?? "",
     reminderAt: contact.reminderAt ?? "",

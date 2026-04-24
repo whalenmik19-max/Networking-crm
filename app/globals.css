@@ -553,6 +553,11 @@ h3 {
   border-top: 1px solid var(--border);
 }
 
+.inline-notes-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
 .inline-follow-up-actions {
   justify-content: flex-start;
 }

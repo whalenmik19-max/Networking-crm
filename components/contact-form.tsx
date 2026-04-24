@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useContacts } from "@/components/contacts-provider";
-import type { Contact, NewContact, RelationshipType } from "@/lib/types";
+import type { Contact, ContactPriority, NewContact, RelationshipType } from "@/lib/types";
 
 type ContactFormProps = {
   mode?: "create" | "edit";
@@ -20,6 +20,7 @@ type ContactFormState = {
   dateMet: string;
   whereWeMet: string;
   relationshipType: RelationshipType;
+  priority: ContactPriority;
   notes: string;
   nextFollowUpDate: string;
   tags: string;
@@ -36,6 +37,7 @@ function buildFormState(contact?: Contact): ContactFormState {
     dateMet: contact?.dateMet ?? "",
     whereWeMet: contact?.whereWeMet ?? "",
     relationshipType: contact?.relationshipType ?? "",
+    priority: contact?.priority ?? "Needs Attention",
     notes: contact?.notes ?? "",
     nextFollowUpDate: contact?.nextFollowUpDate ?? "",
     tags: contact?.tags.join(", ") ?? "",
@@ -70,6 +72,7 @@ export function ContactForm({
       dateMet: formState.dateMet,
       whereWeMet: formState.whereWeMet.trim(),
       relationshipType: formState.relationshipType.trim(),
+      priority: formState.priority,
       notes: formState.notes.trim(),
       nextFollowUpDate: formState.nextFollowUpDate,
       reminderAt: "",
@@ -227,6 +230,21 @@ export function ContactForm({
             placeholder="Mentor, recruiter, friend, alumni contact..."
           />
           <p className="helper-text">Type any label that fits this relationship.</p>
+        </div>
+
+        <div className="field">
+          <label htmlFor="priority">Priority</label>
+          <select
+            id="priority"
+            value={formState.priority}
+            onChange={(event) =>
+              updateField("priority", event.target.value as ContactPriority)
+            }
+          >
+            <option value="High Priority">High Priority</option>
+            <option value="Warm Connection">Warm Connection</option>
+            <option value="Needs Attention">Needs Attention</option>
+          </select>
         </div>
 
         <div className="field">

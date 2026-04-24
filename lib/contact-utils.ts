@@ -50,17 +50,21 @@ export function formatProfessionalSummary(contact: Contact) {
 }
 
 export function getRelationshipStrengthLabel(contact: Contact) {
+  if (contact.priority) {
+    return contact.priority;
+  }
+
   const normalizedType = contact.relationshipType.trim().toLowerCase();
 
   if (["mentor", "recruiter", "professor", "alum"].includes(normalizedType)) {
-    return "High priority";
+    return "High Priority";
   }
 
   if (["peer", "friend"].includes(normalizedType)) {
-    return "Warm connection";
+    return "Warm Connection";
   }
 
-  return "Needs attention";
+  return "Needs Attention";
 }
 
 export function getInitials(name: string) {
