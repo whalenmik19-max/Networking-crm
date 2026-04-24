@@ -57,10 +57,6 @@ export default function ContactsPage() {
         </div>
       </section>
 
-      <p className="helper-text table-hint">
-        Click a contact to view notes and prep your next conversation.
-      </p>
-
       {contactsError ? (
         <section className="content-panel">
           <p className="auth-error">{contactsError}</p>
@@ -104,6 +100,10 @@ export default function ContactsPage() {
           )}
         </section>
       )}
+
+      <p className="helper-text table-hint">
+        Click a contact to view notes and prep your next conversation.
+      </p>
 
       {isContactsLoading ? (
         <section className="content-panel">
