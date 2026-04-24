@@ -563,7 +563,7 @@ h3 {
   align-content: start;
 }
 
-.notes-panel textarea {
+.notes-panel .field textarea {
   height: 154px;
   min-height: 154px;
   max-height: 154px;
