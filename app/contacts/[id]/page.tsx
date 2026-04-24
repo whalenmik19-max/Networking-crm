@@ -266,7 +266,7 @@ export default function ContactDetailPage() {
         </article>
       </section>
 
-      <section className="detail-grid detail-grid-wide">
+      <section className="detail-grid detail-grid-wide detail-grid-balanced">
         <section className="content-panel prep-panel">
           <div className="panel-header">
             <div>
@@ -353,7 +353,7 @@ export default function ContactDetailPage() {
           )}
         </section>
 
-        <div className="stack-panel">
+        <div className="stack-panel detail-column-stack">
           <ReminderCard contactId={activeContact.id} contactName={activeContact.name} />
           <InteractionForm contactId={activeContact.id} />
         </div>
