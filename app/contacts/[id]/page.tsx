@@ -23,8 +23,14 @@ export default function ContactDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { currentUser, isGuestMode, isLoading } = useAuth();
-  const { contacts, deleteContact, updateContact, isContactsLoading, contactsError } =
-    useContacts();
+  const {
+    contacts,
+    deleteContact,
+    updateContact,
+    isContactsLoading,
+    hasResolvedSignedInContacts,
+    contactsError,
+  } = useContacts();
   const contact = contacts.find((item) => item.id === params.id);
   const [followUpDate, setFollowUpDate] = useState("");
   const [followUpStatus, setFollowUpStatus] = useState("");
@@ -43,7 +49,7 @@ export default function ContactDetailPage() {
     setNotesValue(contact?.notes ?? "");
   }, [contact?.notes]);
 
-  if (isLoading || (currentUser && isContactsLoading)) {
+  if (isLoading || (currentUser && (!hasResolvedSignedInContacts || isContactsLoading))) {
     return (
       <div className="empty-page">
         <div className="content-panel">

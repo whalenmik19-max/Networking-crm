@@ -33,6 +33,7 @@ type ContactsContextValue = {
   canAddContact: boolean;
   guestContactsRemaining: number;
   isContactsLoading: boolean;
+  hasResolvedSignedInContacts: boolean;
   contactsError: string;
   addContact: (contact: NewContact) => Promise<Contact | undefined>;
   updateContact: (contactId: string, updates: NewContact) => Promise<Contact | undefined>;
@@ -73,6 +74,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const [guestContacts, setGuestContacts] = useState<Contact[]>(sampleContacts);
   const [hasLoadedGuestContacts, setHasLoadedGuestContacts] = useState(false);
   const [isContactsLoading, setIsContactsLoading] = useState(false);
+  const [hasResolvedSignedInContacts, setHasResolvedSignedInContacts] = useState(false);
   const [contactsError, setContactsError] = useState("");
   const [signedInReminders, setSignedInReminders] = useState<Reminder[]>([]);
 
@@ -89,11 +91,13 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       setSignedInReminders([]);
       setContactsError("");
       setIsContactsLoading(false);
+      setHasResolvedSignedInContacts(true);
       return [];
     }
 
     setIsContactsLoading(true);
     setContactsError("");
+    setHasResolvedSignedInContacts(false);
 
     try {
       const nextContacts = await getSupabaseContacts();
@@ -135,6 +139,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       return [];
     } finally {
       setIsContactsLoading(false);
+      setHasResolvedSignedInContacts(true);
     }
   }, [currentUser]);
 
@@ -162,6 +167,16 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, loadSignedInContacts]);
 
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!currentUser) {
+      setHasResolvedSignedInContacts(true);
+    }
+  }, [currentUser, isLoading]);
+
   function updateGuestContacts(updater: (contacts: Contact[]) => Contact[]) {
     setGuestContacts((current) => updater(current));
   }
@@ -173,6 +188,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       canAddContact,
       guestContactsRemaining,
       isContactsLoading,
+      hasResolvedSignedInContacts,
       contactsError,
       addContact: async (contact) => {
         setContactsError("");
@@ -371,6 +387,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       signedInReminders,
       guestContactsRemaining,
       isContactsLoading,
+      hasResolvedSignedInContacts,
       isGuestMode,
       loadSignedInContacts,
     ],
