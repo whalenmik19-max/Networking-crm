@@ -37,15 +37,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className={`header-actions ${isMobileMenuOpen ? "is-open" : ""}`}>
           <div className="mobile-header-actions">
-            <Link
-              href="/contacts/new"
-              className={`header-primary-action mobile-primary-action ${
-                pathname === "/contacts/new" ? "is-active" : ""
-              }`}
-            >
-              + Add Contact
-            </Link>
-
             <button
               type="button"
               className="mobile-menu-toggle"
