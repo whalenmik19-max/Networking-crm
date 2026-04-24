@@ -51,7 +51,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     if (mode === "signup" && result.requiresEmailConfirmation) {
       setSuccessMessage(
-        "Check your email to confirm your account, then come back and log in.",
+        "Check your email to confirm your account, then come back and login.",
       );
       return;
     }
@@ -66,7 +66,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           <Link href="/" className="text-link auth-back-link">
             Back to Keeply
           </Link>
-          <p className="eyebrow">{mode === "signup" ? "Sign up" : "Log in"}</p>
+          <p className={`eyebrow ${mode === "login" ? "auth-mode-label" : ""}`}>
+            {mode === "signup" ? "Sign up" : "Login"}
+          </p>
           <h1>
             {mode === "signup"
               ? "Create your Keeply account"
@@ -75,7 +77,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           <p className="section-copy">
             {mode === "signup"
               ? "Create an account to save your own contacts, interactions, and follow-up reminders."
-              : "Log in to see your own contacts and pick up where you left off."}
+              : "Login to see your own contacts and pick up where you left off."}
           </p>
         </div>
 
@@ -122,13 +124,13 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           <div className="form-actions">
             <button type="submit" className="button button-primary" disabled={isSubmitting}>
-              {mode === "signup" ? "Create account" : "Log in"}
+              {mode === "signup" ? "Create account" : "Login"}
             </button>
           </div>
 
           {mode === "signup" ? (
             <p className="helper-text">
-              Already have an account? <Link href="/login">Log in</Link>
+              Already have an account? <Link href="/login">Login</Link>
             </p>
           ) : (
             <div className="auth-switch">

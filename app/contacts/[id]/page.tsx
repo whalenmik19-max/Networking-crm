@@ -158,8 +158,10 @@ export default function ContactDetailPage() {
               <dd>{formatOptionalDate(activeContact.nextFollowUpDate)}</dd>
             </div>
             <div>
-              <dt>Relationship strength</dt>
-              <dd>{getRelationshipStrengthLabel(activeContact)}</dd>
+              <dt>Priority</dt>
+              <dd>
+                <span className="priority-badge">{getRelationshipStrengthLabel(activeContact)}</span>
+              </dd>
             </div>
           </dl>
 
@@ -208,90 +210,94 @@ export default function ContactDetailPage() {
         </article>
       </section>
 
-      <section className="content-panel prep-panel">
-        <div className="panel-header">
-          <div>
-            <p className="eyebrow">Signature feature</p>
-            <h2>What to say next</h2>
+      <section className="detail-grid detail-grid-wide">
+        <section className="content-panel prep-panel">
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Signature feature</p>
+              <h2>What to say next</h2>
+            </div>
           </div>
-        </div>
 
-        {isPro ? (
-          <div className="prep-grid">
-            <article className="prep-card">
-              <p className="prep-label">Most recent interaction</p>
-              <p className="notes-copy">{conversationPrep.recentInteractionSummary}</p>
-            </article>
+          {isPro ? (
+            <div className="prep-grid">
+              <article className="prep-card">
+                <p className="prep-label">Most recent interaction</p>
+                <p className="notes-copy">{conversationPrep.recentInteractionSummary}</p>
+              </article>
 
-            <article className="prep-card">
-              <p className="prep-label">Key topics discussed</p>
-              <ul className="prep-list">
-                {conversationPrep.keyTopics.map((topic) => (
-                  <li key={topic}>{topic}</li>
-                ))}
-              </ul>
-            </article>
+              <article className="prep-card">
+                <p className="prep-label">Key topics discussed</p>
+                <ul className="prep-list">
+                  {conversationPrep.keyTopics.map((topic) => (
+                    <li key={topic}>{topic}</li>
+                  ))}
+                </ul>
+              </article>
 
-            <article className="prep-card">
-              <p className="prep-label">Suggested talking points</p>
-              <ul className="prep-list">
-                {conversationPrep.followUpTalkingPoints.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-            </article>
+              <article className="prep-card">
+                <p className="prep-label">Suggested talking points</p>
+                <ul className="prep-list">
+                  {conversationPrep.followUpTalkingPoints.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              </article>
 
-            <article className="prep-card prep-card-wide">
-              <div className="suggested-follow-up-card">
-                <p className="prep-label prep-emphasis-label">What to say next</p>
-                <p className="prompt-copy">You could say:</p>
-                <p className="notes-copy">{conversationPrep.suggestedMessage}</p>
-              </div>
-            </article>
-          </div>
-        ) : isGuestPreviewContact ? (
-          <div className="prep-grid">
-            <article className="prep-card">
-              <p className="prep-label">Most recent interaction</p>
-              <p className="notes-copy">
-                {getPreviewText(conversationPrep.recentInteractionSummary, 14)}
-              </p>
-            </article>
-
-            <article className="prep-card">
-              <p className="prep-label">Topic preview</p>
-              <ul className="prep-list">
-                <li>{conversationPrep.keyTopics[0] || "Your notes will show up here"}</li>
-              </ul>
-            </article>
-
-            <article className="prep-card prep-card-wide">
-              <div className="suggested-follow-up-card preview-follow-up-card">
-                <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
-                <p className="prompt-copy">You could say:</p>
+              <article className="prep-card prep-card-wide">
+                <div className="suggested-follow-up-card">
+                  <p className="prep-label prep-emphasis-label">What to say next</p>
+                  <p className="prompt-copy">You could say:</p>
+                  <p className="notes-copy">{conversationPrep.suggestedMessage}</p>
+                </div>
+              </article>
+            </div>
+          ) : isGuestPreviewContact ? (
+            <div className="prep-grid">
+              <article className="prep-card">
+                <p className="prep-label">Most recent interaction</p>
                 <p className="notes-copy">
-                  {getPreviewText(conversationPrep.suggestedMessage, 18)}
+                  {getPreviewText(conversationPrep.recentInteractionSummary, 14)}
                 </p>
-                <p className="helper-text">
-                  Create an account and upgrade to Pro to unlock the full prep workflow.
-                </p>
-              </div>
-            </article>
-          </div>
-        ) : (
-          <ProLockCard
-            title={
-              isGuestMode
-                ? "Add one of your 3 demo contacts to preview what to say next"
-                : "Unlock smarter follow-ups with Pro"
-            }
-            description={
-              isGuestMode
-                ? "Guests get a limited preview on the first 3 contacts they add. Full prep insights stay on Pro."
-                : "Use Pro to get suggested follow-ups, key topics, and prep notes before you reach back out."
-            }
-          />
-        )}
+              </article>
+
+              <article className="prep-card">
+                <p className="prep-label">Topic preview</p>
+                <ul className="prep-list">
+                  <li>{conversationPrep.keyTopics[0] || "Your notes will show up here"}</li>
+                </ul>
+              </article>
+
+              <article className="prep-card prep-card-wide">
+                <div className="suggested-follow-up-card preview-follow-up-card">
+                  <p className="prep-label prep-emphasis-label">Preview: What to say next</p>
+                  <p className="prompt-copy">You could say:</p>
+                  <p className="notes-copy">
+                    {getPreviewText(conversationPrep.suggestedMessage, 18)}
+                  </p>
+                  <p className="helper-text">
+                    Create an account and upgrade to Pro to unlock the full prep workflow.
+                  </p>
+                </div>
+              </article>
+            </div>
+          ) : (
+            <ProLockCard
+              title={
+                isGuestMode
+                  ? "Add one of your 3 demo contacts to preview what to say next"
+                  : "Unlock smarter follow-ups with Pro"
+              }
+              description={
+                isGuestMode
+                  ? "Guests get a limited preview on the first 3 contacts they add. Full prep insights stay on Pro."
+                  : "Use Pro to get suggested follow-ups, key topics, and prep notes before you reach back out."
+              }
+            />
+          )}
+        </section>
+
+        <ReminderCard contactId={activeContact.id} contactName={activeContact.name} />
       </section>
 
       <section className="detail-grid detail-grid-wide">
@@ -327,7 +333,6 @@ export default function ContactDetailPage() {
         </article>
 
         <div className="stack-panel">
-          <ReminderCard contactId={activeContact.id} contactName={activeContact.name} />
           <InteractionForm contactId={activeContact.id} />
         </div>
       </section>
