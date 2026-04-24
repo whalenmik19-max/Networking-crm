@@ -40,6 +40,7 @@ body {
   color: var(--text);
   font-family: var(--font-body), sans-serif;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 a {
@@ -111,6 +112,7 @@ h3 {
   display: flex;
   align-items: center;
   gap: 0.9rem;
+  min-width: 0;
 }
 
 .nav {
@@ -122,6 +124,7 @@ h3 {
   border-radius: var(--radius-pill);
   background: rgba(244, 250, 251, 0.72);
   border: 1px solid rgba(18, 44, 91, 0.05);
+  min-width: 0;
 }
 
 .nav-link {
@@ -131,6 +134,7 @@ h3 {
   font-size: 0.96rem;
   font-weight: 600;
   line-height: 1;
+  text-align: center;
   transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -303,6 +307,7 @@ h3 {
   color: var(--muted);
   line-height: 1.65;
   font-size: 1.06rem;
+  overflow-wrap: anywhere;
 }
 
 .hero-actions {
@@ -445,6 +450,7 @@ h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 48px;
   border-radius: 999px;
   padding: 0.8rem 1.15rem;
   font-weight: 600;
@@ -880,6 +886,8 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .contacts-table-head {
@@ -1009,6 +1017,7 @@ h3 {
 .field select,
 .field textarea {
   width: 100%;
+  font-size: 16px;
   padding: 0.9rem 1rem;
   border-radius: 18px;
   border: 1px solid var(--border);
@@ -1524,6 +1533,7 @@ h3 {
   border-radius: var(--radius-card);
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.8);
+  min-width: 0;
 }
 
 .timeline-header {
@@ -1600,6 +1610,14 @@ small {
     white-space: normal;
   }
 
+  .site-header {
+    padding: 1rem;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
   .page-header-side-action {
     width: 100%;
     justify-content: flex-start;
@@ -1618,12 +1636,18 @@ small {
     justify-content: flex-start;
   }
 
+  .nav-link,
+  .header-primary-action,
   .nav-auth-button {
     width: 100%;
   }
 
-  .pricing-showcase,
   .pro-inline-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pricing-showcase {
     grid-template-columns: 1fr;
   }
 
@@ -1634,5 +1658,259 @@ small {
 
   .quick-log-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-shell {
+    width: min(1120px, calc(100% - 1.5rem));
+    padding-top: 1rem;
+  }
+
+  .hero,
+  .page-header,
+  .detail-hero {
+    padding: 1.35rem;
+  }
+
+  .content-panel,
+  .table-panel,
+  .form-panel {
+    padding: 1.2rem;
+  }
+
+  .dashboard-grid,
+  .detail-grid,
+  .pricing-grid,
+  .settings-grid,
+  .list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-column-stack {
+    grid-template-rows: auto;
+  }
+
+  .page-header-balanced {
+    align-items: flex-start;
+  }
+
+  .page-header-side-action {
+    align-self: auto;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .hero-actions-signed-in {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 700px) {
+  .app-shell {
+    width: calc(100% - 1rem);
+    padding-bottom: 2.5rem;
+  }
+
+  .site-header {
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    border-radius: 20px;
+  }
+
+  .brand {
+    min-height: 0;
+  }
+
+  .brand-mark {
+    font-size: 1.08rem;
+  }
+
+  .logo-mark {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .page-stack {
+    gap: 1rem;
+  }
+
+  .hero,
+  .page-header,
+  .detail-hero,
+  .content-panel,
+  .table-panel,
+  .form-panel,
+  .empty-page {
+    border-radius: 20px;
+  }
+
+  .hero,
+  .page-header,
+  .detail-hero {
+    padding: 1.15rem;
+    gap: 1rem;
+  }
+
+  .content-panel,
+  .table-panel,
+  .form-panel {
+    padding: 1rem;
+  }
+
+  .hero h1,
+  .page-header h1,
+  .detail-hero h1 {
+    margin: 0.15rem 0 0.5rem;
+    font-size: clamp(1.75rem, 8vw, 2.4rem);
+    line-height: 1.04;
+  }
+
+  .section-copy,
+  .hero-copy,
+  .notes-copy {
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .panel-header h2,
+  .content-panel h2,
+  .compact-form h2 {
+    font-size: 1.2rem;
+  }
+
+  .detail-action-buttons,
+  .hero-actions,
+  .form-actions,
+  .pro-lock-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .detail-action-buttons > *,
+  .hero-actions > *,
+  .form-actions > *,
+  .pro-lock-actions > * {
+    width: 100%;
+  }
+
+  .stats-grid,
+  .prep-grid,
+  .prep-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .prep-card,
+  .prep-card-wide,
+  .prep-meta-wide {
+    grid-column: auto;
+  }
+
+  .contacts-table {
+    gap: 0.75rem;
+  }
+
+  .contacts-table-head {
+    display: none;
+  }
+
+  .contacts-table-row {
+    gap: 0.55rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .view-cell {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .contact-name-cell {
+    gap: 0.7rem !important;
+  }
+
+  .auth-wrapper {
+    padding: 1rem 0.5rem;
+  }
+
+  .auth-copy,
+  .auth-form {
+    padding: 1.25rem;
+  }
+
+  .auth-switch .button {
+    width: 100%;
+  }
+
+  .notes-panel .inline-notes-form .field textarea {
+    height: 320px;
+    min-height: 320px;
+    max-height: 320px;
+  }
+
+  .timeline {
+    gap: 0.75rem;
+  }
+
+  .timeline-card {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    width: calc(100% - 0.75rem);
+  }
+
+  .site-header {
+    padding: 0.85rem;
+  }
+
+  .nav {
+    gap: 0.35rem;
+    padding: 0.2rem;
+  }
+
+  .nav-link,
+  .nav-auth-button,
+  .header-primary-action,
+  .button {
+    min-height: 46px;
+    padding-inline: 0.95rem;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 0.82rem 0.9rem;
+    border-radius: 16px;
+  }
+
+  .pricing-plan {
+    padding: 1.25rem;
+    border-radius: 24px;
+  }
+
+  .pricing-price-stack {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .pricing-feature-list li {
+    align-items: flex-start;
+    gap: 0.65rem;
+  }
+
+  .notes-panel .inline-notes-form .field textarea {
+    height: 280px;
+    min-height: 280px;
+    max-height: 280px;
   }
 }
