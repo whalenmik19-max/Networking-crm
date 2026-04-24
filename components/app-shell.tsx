@@ -2,21 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { LogoMark } from "@/components/logo-mark";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { currentUser, isAdmin, isGuestMode, logOut } = useAuth();
+  const { currentUser, isGuestMode, logOut } = useAuth();
   const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navItems = [
     { href: "/", label: "Dashboard" },
     { href: "/contacts", label: "Contacts" },
     { href: "/pricing", label: "Pricing" },
     { href: "/feedback", label: "Feedback" },
-    ...(currentUser && isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
     ...(currentUser ? [{ href: "/settings", label: "Settings" }] : []),
   ];
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   if (isAuthPage) {
     return <main>{children}</main>;
@@ -30,8 +35,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="brand-mark">Keeply</span>
         </Link>
 
-        <div className="header-actions">
-          <nav className="nav" aria-label="Main navigation">
+        <div className={`header-actions ${isMobileMenuOpen ? "is-open" : ""}`}>
+          <div className="mobile-header-actions">
+            <Link
+              href="/contacts/new"
+              className={`header-primary-action mobile-primary-action ${
+                pathname === "/contacts/new" ? "is-active" : ""
+              }`}
+            >
+              + Add Contact
+            </Link>
+
+            <button
+              type="button"
+              className="mobile-menu-toggle"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="main-navigation"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              onClick={() => setIsMobileMenuOpen((current) => !current)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
+
+          <nav id="main-navigation" className="nav" aria-label="Main navigation">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
@@ -50,7 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <Link
             href="/contacts/new"
-            className={`header-primary-action ${
+            className={`header-primary-action desktop-primary-action ${
               pathname === "/contacts/new" ? "is-active" : ""
             }`}
           >
