@@ -9,7 +9,6 @@ import { useContacts } from "@/components/contacts-provider";
 import {
   formatDate,
   formatOptionalDate,
-  formatProfessionalSummary,
   getInitials,
   getPrioritySortedContacts,
   getRelationshipStrengthLabel,
@@ -19,12 +18,11 @@ import { isProPlan } from "@/lib/plans";
 
 export default function ContactsPage() {
   const { currentUser } = useAuth();
+  const isPro = isProPlan(currentUser?.plan);
   const { contacts, guestContactsRemaining, isGuestMode, isContactsLoading, contactsError } =
     useContacts();
   const [searchQuery, setSearchQuery] = useState("");
-  const prioritizedContacts = isProPlan(currentUser?.plan)
-    ? getPrioritySortedContacts(contacts)
-    : contacts;
+  const prioritizedContacts = isPro ? getPrioritySortedContacts(contacts) : contacts;
   const filteredContacts = searchContacts(prioritizedContacts, searchQuery);
 
   return (
@@ -87,7 +85,7 @@ export default function ContactsPage() {
         </section>
       ) : null}
 
-      {isProPlan(currentUser?.plan) ? null : (
+      {isPro ? null : (
         <section className="content-panel pro-inline-banner">
           <div>
             <p className="eyebrow">Pro sorting</p>
@@ -135,8 +133,7 @@ export default function ContactsPage() {
               <span>Name</span>
               <span>Company</span>
               <span>Date met</span>
-              <span>Priority</span>
-              <span>Relationship</span>
+              {isPro ? <span>Priority</span> : null}
               <span>Next follow-up</span>
               <span />
             </div>
@@ -151,13 +148,12 @@ export default function ContactsPage() {
                   <span className="avatar-circle">{getInitials(contact.name)}</span>
                   <span className="contact-name-copy">
                     <strong className="contact-name-text">{contact.name}</strong>
-                    <small>{formatProfessionalSummary(contact)}</small>
+                    <small>{contact.role || "Not added yet"}</small>
                   </span>
                 </span>
                 <span>{contact.company || "Not added yet"}</span>
                 <span>{contact.dateMet ? formatDate(contact.dateMet) : "Not added yet"}</span>
-                <span>{getRelationshipStrengthLabel(contact)}</span>
-                <span>{contact.relationshipType || "Not added yet"}</span>
+                {isPro ? <span>{getRelationshipStrengthLabel(contact)}</span> : null}
                 <span>{formatOptionalDate(contact.nextFollowUpDate)}</span>
                 <span className="view-cell">View →</span>
               </Link>
