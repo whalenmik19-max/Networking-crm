@@ -115,6 +115,13 @@ h3 {
   min-width: 0;
 }
 
+.header-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
 .mobile-header-actions {
   display: none;
   align-items: center;
@@ -1749,6 +1756,10 @@ small {
   }
 
   .site-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
     gap: 0.85rem;
     margin-bottom: 1rem;
     border-radius: 20px;
@@ -1756,12 +1767,18 @@ small {
   }
 
   .header-actions {
-    align-items: stretch;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
     width: auto;
+    margin-left: auto;
+    position: relative;
   }
 
   .mobile-header-actions {
     display: flex;
+    justify-content: flex-end;
+    width: auto;
   }
 
   .mobile-menu-toggle {
@@ -1773,23 +1790,53 @@ small {
   }
 
   .header-actions .nav,
-  .header-actions .nav-auth-button {
+  .header-actions .header-menu {
     display: none;
   }
 
-  .header-actions.is-open .nav,
-  .header-actions.is-open .nav-auth-button {
+  .header-actions.is-open .header-menu {
     display: flex;
   }
 
+  .header-actions.is-open .header-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 20;
+    width: min(220px, calc(100vw - 2rem));
+    margin-top: 0;
+    padding: 0.35rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
   .header-actions.is-open .nav {
-    margin-top: 0.35rem;
+    width: 100%;
     flex-direction: column;
     align-items: stretch;
     gap: 0.35rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .header-actions.is-open .nav-auth-button {
+    position: static;
+    width: 100%;
+  }
+
+  .header-actions.is-open .nav-link,
+  .header-actions.is-open .nav-auth-button {
+    min-height: 44px;
+  }
+
+  .header-actions.is-open .nav-link {
     width: 100%;
   }
 

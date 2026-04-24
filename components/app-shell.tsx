@@ -51,22 +51,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
-          <nav id="main-navigation" className="nav" aria-label="Main navigation">
-            {navItems.map((item) => {
-              const isActive =
-                item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
+          <div className="header-menu">
+            <nav id="main-navigation" className="nav" aria-label="Main navigation">
+              {navItems.map((item) => {
+                const isActive =
+                  item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`nav-link ${isActive ? "active" : ""}`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`nav-link ${isActive ? "active" : ""}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {currentUser ? (
+              <button
+                type="button"
+                className="nav-auth-button nav-auth-button-muted"
+                onClick={logOut}
+              >
+                Log out
+              </button>
+            ) : (
+              <Link href="/login" className="nav-auth-button">
+                Login/Sign Up
+              </Link>
+            )}
+          </div>
 
           <Link
             href="/contacts/new"
@@ -76,20 +92,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             + Add Contact
           </Link>
-
-          {currentUser ? (
-            <button
-              type="button"
-              className="nav-auth-button nav-auth-button-muted"
-              onClick={logOut}
-            >
-              Log out
-            </button>
-          ) : (
-            <Link href="/login" className="nav-auth-button">
-              Login/Sign Up
-            </Link>
-          )}
         </div>
       </header>
 
