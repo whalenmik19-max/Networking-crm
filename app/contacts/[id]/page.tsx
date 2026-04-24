@@ -347,44 +347,41 @@ export default function ContactDetailPage() {
           )}
         </section>
 
-        <ReminderCard contactId={activeContact.id} contactName={activeContact.name} />
-      </section>
-
-      <section className="detail-grid detail-grid-wide">
-        <article className="content-panel">
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">Interaction history</p>
-              <h2>Every touchpoint with {activeContact.name}</h2>
-            </div>
-          </div>
-
-          {activeContact.interactions.length === 0 ? (
-            <p className="section-copy">
-              No interactions logged yet. Add the next coffee chat, class conversation,
-              or follow-up email below.
-            </p>
-          ) : (
-            <div className="timeline">
-              {activeContact.interactions.map((interaction) => (
-                <article key={interaction.id} className="timeline-card">
-                  <div className="timeline-marker" aria-hidden="true" />
-                  <div className="timeline-content">
-                    <div className="timeline-header">
-                      <span className="date-chip">{formatDate(interaction.date)}</span>
-                      <span className="tag interaction-type">{interaction.type}</span>
-                    </div>
-                    <p className="notes-copy">{interaction.notes}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </article>
-
         <div className="stack-panel">
+          <ReminderCard contactId={activeContact.id} contactName={activeContact.name} />
           <InteractionForm contactId={activeContact.id} />
         </div>
+      </section>
+
+      <section className="content-panel">
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow">Interaction history</p>
+            <h2>Every touchpoint with {activeContact.name}</h2>
+          </div>
+        </div>
+
+        {activeContact.interactions.length === 0 ? (
+          <p className="section-copy">
+            No interactions logged yet. Add the next coffee chat, class conversation,
+            or follow-up email below.
+          </p>
+        ) : (
+          <div className="timeline">
+            {activeContact.interactions.map((interaction) => (
+              <article key={interaction.id} className="timeline-card">
+                <div className="timeline-marker" aria-hidden="true" />
+                <div className="timeline-content">
+                  <div className="timeline-header">
+                    <span className="date-chip">{formatDate(interaction.date)}</span>
+                    <span className="tag interaction-type">{interaction.type}</span>
+                  </div>
+                  <p className="notes-copy">{interaction.notes}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
