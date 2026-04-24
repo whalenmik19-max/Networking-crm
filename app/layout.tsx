@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 import { AuthGuard } from "@/components/auth-guard";
@@ -25,6 +26,7 @@ export default function RootLayout({
             </AuthGuard>
           </ContactsProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
