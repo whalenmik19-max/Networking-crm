@@ -34,6 +34,7 @@ type AccountUpdateResult = Promise<{
 
 type AuthContextValue = {
   currentUser: PublicAuthUser | null;
+  activePlan: Plan;
   isAdmin: boolean;
   isGuestMode: boolean;
   isLoading: boolean;
@@ -94,10 +95,17 @@ function toPublicUser(user: User): PublicAuthUser {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<PublicAuthUser | null>(null);
+  const [guestPlan, setGuestPlan] = useState<Plan>("free");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
+    const storedGuestPlan =
+      typeof window === "undefined"
+        ? "free"
+        : normalizePlan(window.localStorage.getItem("keeply-guest-plan"));
+
+    setGuestPlan(storedGuestPlan);
 
     async function loadSession() {
       const {
@@ -140,9 +148,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AuthContextValue>(() => {
     const supabase = getSupabaseBrowserClient();
+    const activePlan = currentUser?.plan ?? guestPlan;
 
     return {
       currentUser,
+      activePlan,
       isAdmin: isAdminAccount(currentUser),
       isGuestMode: !currentUser,
       isLoading,
@@ -214,6 +224,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: true };
       },
       setPlan: async (plan) => {
+        if (!currentUser) {
+          setGuestPlan(plan);
+
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("keeply-guest-plan", plan);
+          }
+
+          return { success: true };
+        }
+
         const { data, error } = await supabase.auth.updateUser({
           data: {
             name: currentUser?.name ?? "",
@@ -305,7 +325,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
       },
     };
-  }, [currentUser, isLoading]);
+  }, [currentUser, guestPlan, isLoading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

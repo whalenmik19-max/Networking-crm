@@ -45,15 +45,18 @@ function FeatureList({ items, tone }: FeatureListProps) {
 }
 
 export default function PricingPage() {
-  const { currentUser, setPlan } = useAuth();
+  const { currentUser, activePlan, setPlan } = useAuth();
   const [status, setStatus] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const currentPlan = currentUser?.plan ?? "free";
+  const currentPlan = activePlan;
 
   async function handlePlanChange(plan: "free" | "pro") {
     if (!currentUser) {
-      setStatus("Create an account first to choose a plan.");
-      return;
+      setStatus(
+        plan === "pro"
+          ? "You're previewing Pro in guest mode."
+          : "You're back on the Free guest preview.",
+      );
     }
 
     setIsSaving(true);
@@ -68,7 +71,15 @@ export default function PricingPage() {
       return;
     }
 
-    setStatus(plan === "pro" ? "You're now on Pro." : "You're back on the Free plan.");
+    setStatus(
+      currentUser
+        ? plan === "pro"
+          ? "You're now on Pro."
+          : "You're back on the Free plan."
+        : plan === "pro"
+          ? "You're previewing Pro in guest mode."
+          : "You're back on the Free guest preview.",
+    );
   }
 
   return (

@@ -14,11 +14,10 @@ import {
   getRelationshipStrengthLabel,
   searchContacts,
 } from "@/lib/contact-utils";
-import { isProPlan } from "@/lib/plans";
 
 export default function ContactsPage() {
-  const { currentUser } = useAuth();
-  const isPro = isProPlan(currentUser?.plan);
+  const { activePlan, currentUser } = useAuth();
+  const isPro = activePlan === "pro";
   const { contacts, guestContactsRemaining, isGuestMode, isContactsLoading, contactsError } =
     useContacts();
   const [searchQuery, setSearchQuery] = useState("");

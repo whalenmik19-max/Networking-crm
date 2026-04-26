@@ -17,12 +17,11 @@ import {
   getPreviewText,
 } from "@/lib/contact-utils";
 import { isSampleContact } from "@/lib/sample-contacts";
-import { isProPlan } from "@/lib/plans";
 
 export default function ContactDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { currentUser, isGuestMode, isLoading } = useAuth();
+  const { activePlan, currentUser, isGuestMode, isLoading } = useAuth();
   const {
     contacts,
     deleteContact,
@@ -79,7 +78,7 @@ export default function ContactDetailPage() {
 
   const activeContact = contact;
   const conversationPrep = getConversationPrep(activeContact);
-  const isPro = isProPlan(currentUser?.plan);
+  const isPro = activePlan === "pro";
   const isGuestPreviewContact = isGuestMode && !isSampleContact(activeContact.id);
 
   async function handleDeleteContact() {

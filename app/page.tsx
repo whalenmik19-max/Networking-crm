@@ -24,12 +24,11 @@ import {
   getRecentlyAddedContacts,
 } from "@/lib/contact-utils";
 import { isSampleContact } from "@/lib/sample-contacts";
-import { isProPlan } from "@/lib/plans";
 
 export default function DashboardPage() {
-  const { currentUser, isGuestMode } = useAuth();
+  const { currentUser, activePlan, isGuestMode } = useAuth();
   const { contacts, guestContactsRemaining, isContactsLoading, contactsError } = useContacts();
-  const isPro = isProPlan(currentUser?.plan);
+  const isPro = activePlan === "pro";
   const isFree = Boolean(currentUser) && !isPro;
   const overdueFollowUps = getOverdueFollowUps(contacts);
   const dueThisWeek = getFollowUpsDueThisWeek(contacts);
