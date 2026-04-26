@@ -54,8 +54,8 @@ export default function PricingPage() {
     if (!currentUser) {
       setStatus(
         plan === "pro"
-          ? "You're previewing Pro in guest mode."
-          : "You're back on the Free guest preview.",
+          ? "You're previewing Pro for this guest session."
+          : "You're back on the Free guest preview for this session.",
       );
     }
 
@@ -77,8 +77,8 @@ export default function PricingPage() {
           ? "You're now on Pro."
           : "You're back on the Free plan."
         : plan === "pro"
-          ? "You're previewing Pro in guest mode."
-          : "You're back on the Free guest preview.",
+          ? "You're previewing Pro for this guest session."
+          : "You're back on the Free guest preview for this session.",
     );
   }
 

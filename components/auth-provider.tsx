@@ -100,12 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
-    const storedGuestPlan =
-      typeof window === "undefined"
-        ? "free"
-        : normalizePlan(window.localStorage.getItem("keeply-guest-plan"));
-
-    setGuestPlan(storedGuestPlan);
 
     async function loadSession() {
       const {
@@ -226,11 +220,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setPlan: async (plan) => {
         if (!currentUser) {
           setGuestPlan(plan);
-
-          if (typeof window !== "undefined") {
-            window.localStorage.setItem("keeply-guest-plan", plan);
-          }
-
           return { success: true };
         }
 
